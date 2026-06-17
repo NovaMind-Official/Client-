@@ -1,1 +1,6 @@
-
+{
+  "appId": "com.matin.aethertunnel",
+  "appName": "Aether Tunnel",
+  "webDir": ".",
+  "bundledWebRuntime": false
+}
