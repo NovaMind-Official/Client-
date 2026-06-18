@@ -976,14 +976,32 @@
         document.getElementById(id).classList.remove('open'); 
         const openModals = document.querySelectorAll('.fullscreen-modal.open');
         if(openModals.length === 0) document.body.classList.remove('modal-open'); 
+ async function toggleConnection() {
+    if (document.getElementById('nodeListContainer').querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) { 
+        alert(translations[currentLang].errFirst); 
+        return; 
     }
     
-    function toggleConnection() {
-        if (document.getElementById('nodeListContainer').querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) { alert(translations[currentLang].errFirst); return; }
-        isConnected = !isConnected; document.getElementById('powerBtn').classList.toggle('active', isConnected);
-        document.getElementById('statusLabel').innerText = translations[currentLang][isConnected ? 'connected' : 'disconnected'];
-        document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
+    isConnected = !isConnected;
+    document.getElementById('powerBtn').classList.toggle('active', isConnected);
+    document.getElementById('statusLabel').innerText = translations[currentLang][isConnected ? 'connected' : 'disconnected'];
+    document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
+
+    // اتصال واقعی به پل ارتباطی هسته اندروید که ساختیم
+    if (window.Capacitor && window.Capacitor.Plugins.XrayPlugin) {
+        try {
+            if (isConnected) {
+                // ارسال یک نمونه کانفیگ فرضی برای استارت هسته
+                await window.Capacitor.Plugins.XrayPlugin.startTunnel({ config: '{"node":"Aether"}' });
+            } else {
+                await window.Capacitor.Plugins.XrayPlugin.stopTunnel({});
+            }
+        } catch (e) {
+            console.error("Native core communication error:", e);
+        }
     }
+}
+
 
     function initSwipe(id) {
         const card = document.getElementById(id); const wrapper = document.getElementById('wrap-' + id); const actions = wrapper.querySelector('.swipe-actions');
