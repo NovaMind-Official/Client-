@@ -528,7 +528,7 @@
         if(trafficInterval) clearInterval(trafficInterval);
         trafficInterval = setInterval(() => {
             if(isConnected) {
-                let addedVolume = (Math.random() * 0.05).toFixed(3);
+                let addedVolume = (Math.random() * 0.02).toFixed(3);
                 totalDownload = parseFloat((totalDownload + parseFloat(addedVolume)).toFixed(2));
                 
                 const cells = document.querySelectorAll('.settings-cell');
