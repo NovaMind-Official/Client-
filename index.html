@@ -32,7 +32,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-font-smoothing: antialiased; }
         body, html { width: 100vw; height: 100vh; background-color: var(--bg-base); color: var(--text-main); overflow: hidden; font-size: var(--font-scale); transition: background-color 0.5s ease, color 0.5s ease; }
         
-        /* استایل‌های هوشمند راست‌چین (RTL) برای رفع تداخل متون انگلیسی */
+        /* استایل‌های راست‌چین هوشمند */
         body[dir="rtl"] .settings-cell { flex-direction: row-reverse; text-align: right; }
         body[dir="rtl"] .cell-val { flex-direction: row-reverse; text-align: left; }
         body[dir="rtl"] .modal-navbar { flex-direction: row-reverse; }
@@ -45,20 +45,22 @@
         body[dir="rtl"] .swipe-actions { right: auto; left: 0; justify-content: flex-start; padding-right: 0; padding-left: 18px; }
         body[dir="rtl"] .modern-input-field { text-align: right; }
         body[dir="rtl"] .list-check::after { left: 18px; right: auto; }
-        body[dir="rtl"] .eng-text { direction: ltr; inline-size: auto; text-align: left; }
+        body[dir="rtl"] .eng-text { direction: ltr; display: inline-block; text-align: left; }
+        body[dir="rtl"] .plus-dropdown { right: auto; left: 0; transform-origin: top left; }
 
         .ambient { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
         .blur-orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.15; transition: all 1s ease; }
         .orb-1 { top: -20%; left: -10%; width: 70vw; height: 70vw; background: var(--accent-blue); }
         .orb-2 { bottom: -10%; right: -10%; width: 70vw; height: 70vw; background: var(--accent-purple); }
 
+        /* حاشیه امن برای آیپد (Safe Area) */
         .wrapper { 
             position: relative; z-index: 2; width: 100%; height: 100%; 
-            display: flex; flex-direction: column; padding: 40px 20px 20px 20px;
+            display: flex; flex-direction: column; padding: max(40px, env(safe-area-inset-top)) 20px 20px 20px;
             transition: transform 0.6s var(--apple-fluid), border-radius 0.6s var(--apple-fluid), opacity 0.6s var(--apple-fluid);
-            transform-origin: center top; will-change: transform;
+            transform-origin: center top; will-change: transform, opacity, border-radius;
         }
-        body.modal-open .wrapper { transform: scale(0.9) translateY(12px); border-radius: 28px; overflow: hidden; opacity: 0.6; pointer-events: none; }
+        body.modal-open .wrapper { transform: scale(0.93) translateY(10px); border-radius: 28px; overflow: hidden; opacity: 0.5; pointer-events: none; }
 
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; position: relative; z-index: 100; }
         .app-title-logo {
@@ -78,18 +80,27 @@
         .btn-action:active { transform: scale(0.85); background: rgba(128,128,128,0.2); }
         .icon-svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
+        /* انیمیشن زنجیره‌ای منوی پلاس */
         .plus-dropdown {
             position: absolute; top: 60px; right: 0; background: var(--ipad-layer);
             border: var(--border-thin-apple); border-radius: 22px; width: 230px;
             backdrop-filter: blur(60px) saturate(200%); -webkit-backdrop-filter: blur(60px) saturate(200%);
             opacity: 0; transform: translateY(-15px) scale(0.9); transform-origin: top right;
             pointer-events: none; transition: all 0.4s var(--apple-spring); z-index: 1002;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4); overflow: hidden;
         }
         .plus-dropdown.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-        .plus-item { padding: 16px 18px; font-size: 0.98rem; font-weight: 500; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); border-bottom: var(--border-thin-apple); cursor: pointer; transition: background 0.2s; }
+        .plus-item { padding: 16px 18px; font-size: 0.98rem; font-weight: 500; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); border-bottom: var(--border-thin-apple); cursor: pointer; transition: background 0.2s; opacity: 0; transform: translateY(-10px) scale(0.95); }
         .plus-item:active { background: rgba(128,128,128,0.15); }
         .plus-item:last-child { border-bottom: none; }
+        
+        .plus-dropdown.active .plus-item { animation: popIn 0.4s var(--apple-spring) forwards; }
+        .plus-dropdown.active .plus-item:nth-child(1) { animation-delay: 0.05s; }
+        .plus-dropdown.active .plus-item:nth-child(2) { animation-delay: 0.10s; }
+        .plus-dropdown.active .plus-item:nth-child(3) { animation-delay: 0.15s; }
+        .plus-dropdown.active .plus-item:nth-child(4) { animation-delay: 0.20s; }
+        .plus-dropdown.active .plus-item:nth-child(5) { animation-delay: 0.25s; }
+        @keyframes popIn { to { opacity: 1; transform: translateY(0) scale(1); } }
 
         .power-hub { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 20px; }
         .power-trigger {
@@ -101,7 +112,14 @@
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         .power-trigger:active { transform: scale(0.9); }
-        .power-trigger.active { color: var(--success); box-shadow: 0 0 45px rgba(48, 209, 88, 0.3), inset 0 0 25px rgba(48, 209, 88, 0.1); border-color: rgba(48, 209, 88, 0.5); }
+        
+        /* افکت نوری Glow برای دکمه پاور */
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 30px rgba(48, 209, 88, 0.3), inset 0 0 15px rgba(48, 209, 88, 0.1); }
+            100% { box-shadow: 0 0 55px rgba(48, 209, 88, 0.7), inset 0 0 25px rgba(48, 209, 88, 0.3); border-color: rgba(48, 209, 88, 0.8); }
+        }
+        .power-trigger.active { color: var(--success); border-color: rgba(48, 209, 88, 0.5); animation: pulseGlow 1.5s infinite alternate ease-in-out; }
+        
         .status-lbl { margin-top: 25px; font-size: 0.85rem; font-weight: 700; color: var(--text-sub); letter-spacing: 2px; text-transform: uppercase; transition: color 0.4s; }
 
         .nodes-container { height: 42vh; overflow-y: auto; padding-bottom: 20px; scroll-behavior: smooth; }
@@ -113,7 +131,7 @@
             display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 18px; 
             opacity: 0; pointer-events: none; transition: opacity 0.3s var(--apple-fluid); z-index: 1; 
         }
-        .action-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; transition: transform 0.2s var(--apple-spring); }
+        .action-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; transition: transform 0.2s var(--apple-spring); pointer-events: auto; }
         .action-circle:active { transform: scale(0.85); }
         .btn-copy { background: #5856d6; }
         .btn-edit { background: var(--warning); }
@@ -151,14 +169,15 @@
         .ping-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
 
+        /* مدال‌های شتاب‌یافته */
         .fullscreen-modal {
             position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2000;
             background: var(--bg-base); color: var(--text-main); 
             transform: translate3d(100%, 0, 0); transition: transform 0.5s var(--apple-spring);
-            display: flex; flex-direction: column; overflow: hidden; will-change: transform;
+            display: flex; flex-direction: column; overflow: hidden; will-change: transform, opacity;
         }
         .fullscreen-modal.open { transform: translate3d(0, 0, 0); }
-        .modal-navbar { display: flex; justify-content: space-between; align-items: center; padding: 50px 20px 20px 20px; background: var(--ipad-layer); backdrop-filter: blur(60px) saturate(180%); border-bottom: var(--border-thin-apple); z-index: 10; }
+        .modal-navbar { display: flex; justify-content: space-between; align-items: center; padding: max(50px, env(safe-area-inset-top)) 20px 20px 20px; background: var(--ipad-layer); backdrop-filter: blur(60px) saturate(180%); border-bottom: var(--border-thin-apple); z-index: 10; }
         .modal-headline { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
         .modal-dismiss { color: var(--accent-purple); cursor: pointer; font-size: 1.05rem; font-weight: 500; display:flex; align-items:center; gap:4px; }
         .modal-dismiss:active { opacity: 0.6; }
@@ -196,12 +215,13 @@
         .primary-btn { width: 100%; padding: 18px; border-radius: 16px; background: var(--accent-blue); color: white; font-weight: 700; font-size: 1.05rem; border: none; margin-top: 25px; cursor: pointer; transition: transform 0.3s var(--apple-spring), background 0.3s; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); }
         .primary-btn:active { transform: scale(0.95); background: #007aff; }
 
+        /* استایل مصرف 7 روزه اپ‌استور */
         .appstore-expanded-overlay { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3000; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(25px); opacity: 0; pointer-events: none; transition: opacity 0.5s ease; display: flex; flex-direction: column; justify-content: flex-end; }
         .appstore-expanded-overlay.open { opacity: 1; pointer-events: auto; }
-        .appstore-card-sheet { background: var(--bg-base); color: var(--text-main); border-top-left-radius: 36px; border-top-right-radius: 36px; width: 100%; height: 88vh; transform: translate3d(0, 100%, 0); transition: transform 0.65s var(--apple-spring); display: flex; flex-direction: column; overflow: hidden; border-top: var(--border-thin-apple); box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
+        .appstore-card-sheet { background: var(--bg-base); color: var(--text-main); border-radius: 36px 36px 0 0; width: 100%; height: 88vh; transform: translate3d(0, 100%, 0); transition: transform 0.6s var(--apple-spring); display: flex; flex-direction: column; overflow: hidden; border-top: var(--border-thin-apple); box-shadow: 0 -10px 40px rgba(0,0,0,0.5); will-change: transform; }
         .appstore-expanded-overlay.open .appstore-card-sheet { transform: translate3d(0, 0, 0); }
-        .real-data-graph { height: 160px; background: rgba(120,120,128,0.12); border-radius: 20px; margin-top: 20px; display: flex; align-items: flex-end; padding: 15px; gap: 10px; }
-        .bar { flex: 1; background: linear-gradient(to top, var(--accent-blue), #5ac8fa); border-radius: 6px; position: relative; transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .real-data-graph { height: 160px; background: rgba(120,120,128,0.12); border-radius: 20px; margin-top: 20px; display: flex; align-items: flex-end; justify-content: space-between; padding: 25px 15px 15px 15px; gap: 8px; }
+        .bar { flex: 1; max-width: 30px; background: linear-gradient(to top, var(--accent-blue), #5ac8fa); border-radius: 6px; position: relative; transition: height 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); min-height: 5%; }
         .bar span { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: var(--text-sub); }
     </style>
 </head>
@@ -220,9 +240,6 @@
         <div class="app-title-logo">Aether</div>
 
         <div class="action-cluster">
-            <div class="btn-action" style="color: var(--accent-blue);" onclick="openModal('modal-hotspot')">
-                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
-            </div>
             <div class="btn-action" onclick="togglePlusMenu(event)">
                 <svg class="icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </div>
@@ -356,7 +373,7 @@
     <div class="modal-scrollable-body">
         <div class="settings-section-header" data-i18n="selectLang">SELECT LANGUAGE</div>
         <div class="settings-card-group">
-            <div class="settings-cell list-check" id="lang-opt-en" onclick="selectLanguageOpt('en')"><span>English</span></div>
+            <div class="settings-cell list-check" id="lang-opt-en" onclick="selectLanguageOpt('en')"><span class="eng-text">English</span></div>
             <div class="settings-cell" id="lang-opt-fa" onclick="selectLanguageOpt('fa')"><span>Persian (فارسی)</span></div>
         </div>
     </div>
@@ -531,7 +548,7 @@
     <div class="modal-navbar">
         <div class="modal-dismiss" onclick="closeModal('modal-logs')">‹ <span data-i18n="settings">Settings</span></div>
         <div class="modal-headline" data-i18n="logs">Logs</div>
-        <div style="width:60px; color:var(--accent-purple); font-weight:500; text-align:right; cursor:pointer;" data-i18n="edit" onclick="alert('Logs clear triggereded')">Edit</div>
+        <div style="width:60px; color:var(--accent-purple); font-weight:500; text-align:right; cursor:pointer;" data-i18n="edit" onclick="alert('Logs cleared!')">Edit</div>
     </div>
     <div class="modal-scrollable-body">
         <div class="settings-card-group" style="margin-top:20px;">
@@ -701,13 +718,41 @@
     </div>
 </div>
 
+<div class="appstore-expanded-overlay" id="appstoreOverlay" onclick="closeAppStoreSheet()">
+    <div class="appstore-card-sheet" onclick="event.stopPropagation()">
+        <div style="padding: 30px; border-bottom: var(--border-thin-apple); display: flex; justify-content: space-between; align-items: center;">
+            <div><span style="font-size:0.8rem; color:var(--text-sub); font-weight:600; letter-spacing:1px;" data-i18n="aetherNode">AETHER NODE</span><h2 id="sheet-title" style="font-size:1.7rem; font-weight:800; margin-top:4px;">Node Name</h2></div>
+            <div class="modal-dismiss" style="background: rgba(120,120,128,0.16); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-sub);" onclick="closeAppStoreSheet()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+        </div>
+        <div style="padding: 25px; overflow-y: auto;">
+            <p style="font-size:0.95rem; font-weight:600; color:var(--text-sub);" data-i18n="usage7d">7-Day Real Traffic Usage</p>
+            
+            <div class="real-data-graph" id="dataGraph">
+                <div class="bar" style="height:5%"><span>M</span></div>
+                <div class="bar" style="height:5%"><span>T</span></div>
+                <div class="bar" style="height:5%"><span>W</span></div>
+                <div class="bar" style="height:5%"><span>T</span></div>
+                <div class="bar" style="height:5%"><span>F</span></div>
+                <div class="bar" style="height:5%"><span>S</span></div>
+                <div class="bar" style="height:5%"><span>S</span></div>
+            </div>
+
+            <div class="settings-card-group" style="margin-top: 25px;">
+                <div class="settings-cell"><span data-i18n="protocol">Protocol</span> <div class="cell-val" style="font-weight:600; color:var(--text-main);">VLESS TCP</div></div>
+                <div class="settings-cell"><span data-i18n="totDl">Total Download</span> <div class="cell-val" style="font-weight:600; color:var(--text-main);">12.4 GB</div></div>
+                <div class="settings-cell"><span data-i18n="currPing">Current Ping</span> <div class="cell-val" style="color:var(--success); font-weight:700;" id="sheet-ping">-- ms</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const translations = {
         en: {
             subUrl: "Subscription URL", importClip: "Import from clipboard", importFile: "Import from File", qrCode: "QR-Code Scanner", manual: "Manual input",
             disconnected: "DISCONNECTED", connected: "CONNECTED", cancel: "Cancel", newConfig: "New Configuration", remark: "Remark (Name)", 
             protocol: "Protocol Type", configLink: "Config Link / URI", saveConfig: "Save & Import", backHome: "Home", settings: "Settings", 
-            uiSettings: "UI Settings", language: "Language", appTheme: "App Appearance", close: "Close", hotspot: "Hotspot Engine", enableHotspot: "Enable Hotspot",
+            uiSettings: "UI Settings", language: "Language", appTheme: "App Appearance", close: "Close",
             emptyState: "No servers added yet. Tap + to import.", copied: "Copied!", offline: "Offline", active: "Active", timeout: "Timeout", errorLink: "Please enter config link!",
             langEn: "English", langFa: "Persian (فارسی)", themeSys: "System", themeDark: "Dark", themeLight: "Light", errFirst: "Add a server first!", camErr: "Camera scanner reserved for Android build.",
             fontSize: "Font Size", sizeVSmall: "Very small", sizeSmall: "Small", sizeNormal: "Normal", sizeLarge: "Large", sizeBig: "Big", btnSize: "Button Size", floatBtn: "Floating Button ⓘ", showScroll: "Show Scroll Indicator", liveAct: "Live Activity ⓘ",
@@ -733,7 +778,7 @@
             subUrl: "لینک اشتراک", importClip: "وارد کردن از کلیپ‌بورد", importFile: "انتخاب فایل کانفیگ", qrCode: "اسکن بارکد (دوربین)", manual: "ساخت دستی کانفیگ",
             disconnected: "قطع اتصال", connected: "متصل شد", cancel: "لغو", newConfig: "افزودن سرور جدید", remark: "نام سرور (دلخواه)", 
             protocol: "نوع پروتکل", configLink: "لینک کانفیگ (vless://)", saveConfig: "ذخیره و افزودن به لیست", backHome: "خانه", settings: "تنظیمات", 
-            uiSettings: "تنظیمات ظاهری", language: "زبان برنامه", appTheme: "تم برنامه", close: "بستن", hotspot: "هات‌اسپات", enableHotspot: "روشن کردن هات‌اسپات",
+            uiSettings: "تنظیمات ظاهری", language: "زبان برنامه", appTheme: "تم برنامه", close: "بستن",
             emptyState: "لیست سرورها خالی است. برای افزودن روی + بزنید.", copied: "کپی شد!", offline: "آفلاین", active: "فعال", timeout: "خطای اتصال", errorLink: "لطفا لینک کانفیگ را وارد کنید!",
             langEn: "انگلیسی", langFa: "فارسی", themeSys: "سیستم", themeDark: "تاریک", themeLight: "روشن", errFirst: "ابتدا یک سرور اضافه کنید!", camErr: "دسترسی دوربین در نسخه نهایی فعال می‌شود.",
             fontSize: "اندازه فونت", sizeVSmall: "خیلی کوچک", sizeSmall: "کوچک", sizeNormal: "متوسط", sizeLarge: "بزرگ", sizeBig: "بزرگتر", btnSize: "اندازه دکمه‌ها", floatBtn: "دکمه شناور ⓘ", showScroll: "نمایش نوار اسکرول", liveAct: "فعالیت زنده (Live Activity) ⓘ",
@@ -761,12 +806,10 @@
     let isConnected = false;
     let currentEditingNodeId = null;
 
-    // توابع داینامیک کردن لایو اسلایدرها (حل باگ شماره ۲)
     function updateSubTimeout(val) { document.getElementById('subTimeoutVal').innerText = val; }
     function updatePingTimeout(val) { document.getElementById('pingTimeoutVal').innerText = val + 's'; }
     function updateMemLimit(val) { document.getElementById('memLimitVal').innerText = val + 'MB'; }
 
-    // توابع گزینه‌های تیک‌دار نیتیو
     function selectLanguageOpt(lang) {
         document.getElementById('lang-opt-en').classList.toggle('list-check', lang === 'en');
         document.getElementById('lang-opt-fa').classList.toggle('list-check', lang === 'fa');
@@ -880,9 +923,9 @@
         const html = `
             <div class="swipe-wrapper" id="wrap-${nodeId}">
                 <div class="swipe-actions">
-                    <div class="action-circle btn-copy" onclick="alert('${copiedText}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
-                    <div class="action-circle btn-edit" onclick="launchEditModal(event, '${nodeId}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div>
-                    <div class="action-circle btn-delete" onclick="document.getElementById('wrap-${nodeId}').remove(); checkEmptyState();"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
+                    <div class="action-circle btn-copy" onclick="event.stopPropagation(); alert('${copiedText}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                    <div class="action-circle btn-edit" onclick="event.stopPropagation(); launchEditModal(event, '${nodeId}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div>
+                    <div class="action-circle btn-delete" onclick="event.stopPropagation(); document.getElementById('wrap-${nodeId}').remove(); checkEmptyState();"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
                 </div>
                 <div class="config-node-card collapsed" id="${nodeId}" onclick="openSheet('${title}')">
                     <div class="quota-header-container">
@@ -897,7 +940,22 @@
     }
 
     function toggleCollapse(e, id) { e.stopPropagation(); document.getElementById(id).classList.toggle('collapsed'); }
-    function openSheet(title) { document.getElementById('sheet-title').innerText = title; document.getElementById('appstoreOverlay').classList.add('open'); document.body.classList.add('modal-open'); }
+    
+    function openSheet(title) { 
+        document.getElementById('sheet-title').innerText = title; 
+        document.getElementById('appstoreOverlay').classList.add('open'); 
+        document.body.classList.add('modal-open'); 
+        
+        // ریست و اجرای انیمیشن ستون‌های نمودار مصرف 7 روزه
+        const bars = document.querySelectorAll('.real-data-graph .bar');
+        bars.forEach(bar => {
+            bar.style.height = '5%'; 
+            setTimeout(() => {
+                bar.style.height = Math.floor(Math.random() * 70 + 30) + '%';
+            }, 100);
+        });
+    }
+
     function closeAppStoreSheet() { document.getElementById('appstoreOverlay').classList.remove('open'); document.body.classList.remove('modal-open'); }
     function launchEditModal(event, id) { event.stopPropagation(); currentEditingNodeId = id; document.getElementById('edit-node-name').value = document.getElementById(id).querySelector('.node-title-label').innerText; openModal('modal-edit-node'); document.getElementById(id).style.transform = 'translate3d(0,0,0)'; }
     function saveNodeChanges() { if(currentEditingNodeId) { document.getElementById(currentEditingNodeId).querySelector('.node-title-label').innerText = document.getElementById('edit-node-name').value; closeModal('modal-edit-node'); } }
@@ -927,7 +985,6 @@
         document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
     }
 
-    // سیستم پیشرفته جهت مهار باگ تداخل اسکرول با سوایپ (حل باگ شماره ۳)
     function initSwipe(id) {
         const card = document.getElementById(id); const wrapper = document.getElementById('wrap-' + id); const actions = wrapper.querySelector('.swipe-actions');
         let startX = 0, startY = 0, currentX = 0, isSwiping = false, isScrolling = false, isOpen = false;
@@ -941,7 +998,7 @@
         card.addEventListener('touchmove', e => { 
             let diffX = e.touches[0].clientX - startX; let diffY = e.touches[0].clientY - startY;
             if (!isSwiping && !isScrolling) {
-                if (Math.abs(diffY) > Math.abs(diffX)) { isScrolling = true; return; } // کاربر دارد اسکرول عادی می‌کند
+                if (Math.abs(diffY) > Math.abs(diffX)) { isScrolling = true; return; } 
                 else { isSwiping = true; }
             }
             if (isScrolling) return;
