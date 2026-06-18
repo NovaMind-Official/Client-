@@ -450,209 +450,77 @@
 </div>
 
 <script>
-    const i18nData = {
-        en: { disconnected: "DISCONNECTED", connected: "CONNECTED", subUrl: "Subscription URL", importClip: "Import from clipboard", importFile: "Import from File", qrCode: "QR-Code", manual: "Manual input" },
-        fa: { disconnected: "قطع ارتباط", connected: "متصل شد", subUrl: "لینک اشتراک", importClip: "وارد کردن از کلیپ‌بورد", importFile: "وارد کردن از فایل", qrCode: "اسکن بارکد", manual: "ورود دستی" }
-    };
-    let currentLang = 'en';
-    let isConnected = false;
-
-    function changeLanguage(lang) {
-        currentLang = lang;
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if(i18nData[lang][key]) el.innerText = i18nData[lang][key];
-        });
-        document.body.style.direction = (lang === 'fa') ? 'rtl' : 'ltr';
-        checkEmptyState();
-    }
-
-    function toggleTheme(theme) { theme === 'light' ? document.body.classList.add('light-mode') : document.body.classList.remove('light-mode'); }
-    function changeFontSize(size) { document.documentElement.style.setProperty('--font-scale', size); }
-    function openModal(id) { document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); if(id!=='modal-dev-settings') document.body.classList.remove('modal-open'); }
-    function togglePlusMenu() { document.getElementById('plusMenu').classList.toggle('active'); }
+      // تمام توابع اصلی برنامه در یک‌جا
     
-    window.addEventListener('click', (e) => { 
-        if(!e.target.closest('.action-cluster')) {
-            const menu = document.getElementById('plusMenu');
-            if(menu) menu.classList.remove('active');
-        }
-    });
+    // ۱. مدیریت منوی پلاس
+    async function triggerMenuAction(action) {
+        document.getElementById('plusMenu').classList.remove('active');
+        console.log("Action triggered:", action);
 
-    function checkEmptyState() {
-        const container = document.getElementById('nodeListContainer');
-        if (container.querySelectorAll('.swipe-wrapper').length === 0) {
-            container.innerHTML = `<div id="empty-state-msg" style="text-align:center; color:var(--text-sub); padding:40px 20px; font-size:0.95rem; font-weight:500;">${currentLang === 'fa' ? 'هیچ سروری اضافه نشده است. برای شروع روی + بزنید.' : 'No servers added yet. Tap + to import.'}</div>`;
-        } else {
-            const msg = document.getElementById('empty-state-msg');
-            if (msg) msg.remove();
-        }
-    }
-
-    async function checkRealPing() {
-        const startTime = performance.now();
-        try {
-            await fetch('https://1.1.1.1/cdn-cgi/trace', { mode: 'no-cors', cache: 'no-store' });
-            const duration = Math.floor(performance.now() - startTime);
-            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = duration + ' ms');
-            const sheetPing = document.getElementById('sheet-ping');
-            if(sheetPing) sheetPing.innerText = duration + ' ms';
-        } catch (error) {
-            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = 'Timeout');
-        }
-    }
-
-    window.onload = () => { 
-        checkEmptyState();
-        setInterval(checkRealPing, 5000);
-    };
-
-          async function triggerMenuAction(action) {
-        const menu = document.getElementById('plusMenu');
-        if (menu) menu.classList.remove('active');
-
-        setTimeout(() => {
-            if (action === 'Manual Input') {
+        if (action === 'Manual Input') {
+            openModal('modal-add-config');
+        } 
+        else if (action === 'Import from clipboard') {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('new-node-link').value = text || '';
                 openModal('modal-add-config');
-            } 
-            else if (action === 'Import from clipboard') {
-                navigator.clipboard.readText().then(text => {
-                    document.getElementById('new-node-link').value = text || '';
-                    openModal('modal-add-config');
-                }).catch(() => openModal('modal-add-config'));
+            } catch (e) {
+                openModal('modal-add-config');
             }
-            else if (action === 'Import from File') {
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.click();
-                fileInput.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            document.getElementById('new-node-link').value = e.target.result;
-                            document.getElementById('new-node-name').value = file.name;
-                            openModal('modal-add-config');
-                        };
-                        reader.readAsText(file);
-                    }
-                };
-            }
-            else if (action === 'QR-Code Scanner') {
-                alert("Camera scanner will be available in the final Android build.");
-            }
-        }, 150);
-    }
-
-
-    let currentEditingNodeId = null;
-
-    function addNode(title, method) {
-        const container = document.getElementById('nodeListContainer');
-        const msg = document.getElementById('empty-state-msg');
-        if (msg) msg.remove();
-
-        const nodeId = 'node-' + Math.floor(Math.random() * 10000);
-        const html = `
-            <div class="swipe-wrapper" id="wrap-${nodeId}">
-                <div class="swipe-actions">
-                    <div class="action-circle btn-copy" onclick="alert('Copied!')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
-                    <div class="action-circle btn-edit" onclick="launchEditModal(event, '${nodeId}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div>
-                    <div class="action-circle btn-delete" onclick="document.getElementById('wrap-${nodeId}').remove(); checkEmptyState();"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
-                </div>
-                <div class="config-node-card collapsed" id="${nodeId}" onclick="openSheet('${title}')">
-                    <div class="quota-header-container">
-                        <div class="node-title-container"><div class="node-title-label">${title}</div><div class="node-type-label">${method}</div></div>
-                        <div class="config-collapse-arrow" onclick="toggleCollapse(event, '${nodeId}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
-                    </div>
-                    <div class="card-foldable-zone"><div class="foldable-inner"><div class="node-details"><span>Status: Active</span><div class="live-ping-box"><div class="ping-dot"></div><span class="live-ping-text">...</span></div></div></div></div>
-                </div>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', html);
-        initSwipe(nodeId);
-        checkRealPing();
-    }
-
-    function toggleCollapse(e, id) { e.stopPropagation(); document.getElementById(id).classList.toggle('collapsed'); }
-    function launchEditModal(event, id) { event.stopPropagation(); currentEditingNodeId = id; document.getElementById('edit-node-name').value = document.getElementById(id).querySelector('.node-title-label').innerText; openModal('modal-edit-node'); document.getElementById(id).style.transform = 'translate3d(0,0,0)'; }
-    function saveNodeChanges() { if(currentEditingNodeId) { document.getElementById(currentEditingNodeId).querySelector('.node-title-label').innerText = document.getElementById('edit-node-name').value; closeModal('modal-edit-node'); } }
-    function openSheet(title) { document.getElementById('sheet-title').innerText = title; document.getElementById('appstoreOverlay').classList.add('open'); document.body.classList.add('modal-open'); }
-    function closeAppStoreSheet() { document.getElementById('appstoreOverlay').classList.remove('open'); document.body.classList.remove('modal-open'); }
-
-    function initSwipe(id) {
-        const card = document.getElementById(id); 
-        const wrapper = document.getElementById('wrap-' + id);
-        const actions = wrapper.querySelector('.swipe-actions');
-        let startX = 0, startY = 0, currentX = 0;
-        let isSwiping = false, isScrolling = false;
-
-        card.addEventListener('touchstart', e => { 
-            startX = e.touches[0].clientX; 
-            startY = e.touches[0].clientY;
-            currentX = startX;
-            card.style.transition = 'none'; 
-            isSwiping = false; isScrolling = false;
-        }, {passive:true});
-        
-        card.addEventListener('touchmove', e => { 
-            let diffX = e.touches[0].clientX - startX;
-            let diffY = e.touches[0].clientY - startY;
-            if (!isSwiping && Math.abs(diffY) > Math.abs(diffX)) { isScrolling = true; return; }
-            if (isScrolling) return;
-            isSwiping = true;
-            currentX = e.touches[0].clientX; 
-            if (diffX < 0 && diffX > -190) { 
-                card.style.transform = `translate3d(${diffX}px, 0, 0)`; 
-                actions.style.opacity = Math.min(1, Math.abs(diffX) / 100);
-            } 
-        }, {passive:true});
-        
-        card.addEventListener('touchend', e => { 
-            if (!isSwiping) return;
-            let diffX = currentX - startX;
-            card.style.transition = 'transform 0.5s var(--apple-spring)'; 
-            if (diffX < -70) { 
-                card.style.transform = 'translate3d(-175px, 0, 0)'; 
-                actions.style.opacity = '1';
-                actions.style.pointerEvents = 'auto'; 
-            } else { 
-                card.style.transform = 'translate3d(0, 0, 0)'; 
-                actions.style.opacity = '0';
-                actions.style.pointerEvents = 'none'; 
-            } 
-        });
-    }
-
-    function toggleConnection() {
-        const container = document.getElementById('nodeListContainer');
-        if (container.querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) {
-            alert(currentLang === 'fa' ? "لطفاً ابتدا یک سرور اضافه کنید!" : "Please add a server first!");
-            return;
         }
-        isConnected = !isConnected; 
-        document.getElementById('powerBtn').classList.toggle('active', isConnected);
-        document.getElementById('statusLabel').innerText = i18nData[currentLang][isConnected ? 'connected' : 'disconnected'];
-        document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
-       function saveNewConfig() {
-        let name = document.getElementById('new-node-name').value.trim();
-        let protocol = document.getElementById('new-node-protocol').value;
-        let link = document.getElementById('new-node-link').value.trim();
-        
-        if (!name) name = 'New Config';
-        
-        // این دستور کارت سرور را روی صفحه می‌سازد
+        else if (action === 'Import from File') {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.click();
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('new-node-link').value = e.target.result;
+                    document.getElementById('new-node-name').value = file.name;
+                    openModal('modal-add-config');
+                };
+                reader.readAsText(file);
+            };
+        }
+    }
+
+    // ۲. ذخیره کانفیگ جدید
+    function saveNewConfig() {
+        const name = document.getElementById('new-node-name').value || "New Server";
+        const protocol = document.getElementById('new-node-protocol').value;
+        const link = document.getElementById('new-node-link').value;
+
+        if(!link) { alert("Please enter config link!"); return; }
+
         addNode(name, protocol);
-        
-        // بستن مدال بعد از ذخیره
         closeModal('modal-add-config');
         
-        // پاک کردن فیلدها برای استفاده بعدی
+        // پاکسازی
         document.getElementById('new-node-name').value = '';
         document.getElementById('new-node-link').value = '';
     }
- }
 
+    // ۳. توابع پایه که برای عملکرد برنامه ضروری هستند
+    function openModal(id) { document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); }
+
+    // ۴. پینگ واقعی (برای تست)
+    async function checkRealPing() {
+        try {
+            const start = performance.now();
+            await fetch('https://1.1.1.1/cdn-cgi/trace', { mode: 'no-cors' });
+            const duration = Math.floor(performance.now() - start);
+            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = duration + ' ms');
+        } catch (e) {
+            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = 'Offline');
+        }
+    }
+    
+    // اجرای پینگ در شروع برنامه
+    window.onload = () => setInterval(checkRealPing, 5000);
 
 </script>
 </body>
