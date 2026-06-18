@@ -449,14 +449,11 @@
 </div>
 
 <script>
-     const i18nData = {
+    const i18nData = {
         en: { disconnected: "DISCONNECTED", connected: "CONNECTED", subUrl: "Subscription URL", importClip: "Import from clipboard", qrCode: "QR-Code", manual: "Manual input", copyJson: "Copy JSON" },
         fa: { disconnected: "قطع ارتباط", connected: "متصل شد", subUrl: "لینک اشتراک", importClip: "وارد کردن از کلیپ‌بورد", qrCode: "اسکن بارکد", manual: "ورود دستی", copyJson: "کپی فایل JSON" }
     };
     let currentLang = 'en';
-    let isConnected = false;
-    let trafficInterval = null;
-    let totalDownload = 0.0; // شروع از صفر چون دمو بدون سرور است
 
     function changeLanguage(lang) {
         currentLang = lang;
@@ -465,7 +462,6 @@
             if(i18nData[lang][key]) el.innerText = i18nData[lang][key];
         });
         document.body.style.direction = (lang === 'fa') ? 'rtl' : 'ltr';
-        checkEmptyState();
     }
 
     function toggleTheme(theme) { theme === 'light' ? document.body.classList.add('light-mode') : document.body.classList.remove('light-mode'); }
@@ -474,110 +470,20 @@
     function closeModal(id) { document.getElementById(id).classList.remove('open'); if(id!=='modal-dev-settings') document.body.classList.remove('modal-open'); }
     function togglePlusMenu() { document.getElementById('plusMenu').classList.toggle('active'); }
     window.addEventListener('click', (e) => { if(!e.target.closest('.action-cluster')) document.getElementById('plusMenu').classList.remove('active'); });
+    function triggerMenuAction(action) { alert("Action Called: " + action); document.getElementById('plusMenu').classList.remove('active'); }
 
-    // --- سیستم هوشمند افزودن کانفیگ توسط کاربر ---
-        function triggerMenuAction(action) {
-        // ۱. بستن منو
-        document.getElementById('plusMenu').classList.remove('active');
-        
-        // ۲. ایجاد وقفه ۱۰۰ میلی‌ثانیه‌ای برای جلوگیری از فریز شدن سیستم
-        setTimeout(() => {
-            if (action === 'Manual Input' || action === 'Import from clipboard') {
-                let defaultName = action === 'Manual Input' ? 'Custom Server' : 'Imported Server';
-                let title = prompt(currentLang === 'fa' ? "لطفاً نام سرور را وارد کنید:" : "Enter Server Name:", defaultName);
-                if (!title) return;
-                
-                let method = prompt(currentLang === 'fa' ? "نوع پروتکل (VLESS, TROJAN, VMESS):" : "Enter Protocol (VLESS, TROJAN, VMESS):", "VLESS");
-                if (!method) return;
-                
-                addNode(title, method.toUpperCase());
-                // حذف آلرت "با موفقیت اضافه شد" برای جلوگیری از فریز مجدد
-            } else {
-                alert("Action Called: " + action);
-            }
-        }, 100);
-    }
-
-
-    // بررسی خالی بودن لیست سرورها
-    function checkEmptyState() {
-        const container = document.getElementById('nodeListContainer');
-        if (container.children.length === 0) {
-            container.innerHTML = `<div id="empty-state-msg" style="text-align:center; color:var(--text-sub); padding:40px 20px; font-size:0.95rem; font-weight:500;">${currentLang === 'fa' ? 'هیچ سروری اضافه نشده است. روی + بزنید.' : 'No servers added yet. Tap + to add.'}</div>`;
-        } else {
-            const msg = document.getElementById('empty-state-msg');
-            if (msg) msg.remove();
-        }
-    }
-
-    // --- سیستم پینگ واقعی ---
-    async function checkRealPing() {
-        const startTime = performance.now();
-        try {
-            await fetch('https://1.1.1.1/cdn-cgi/trace', { mode: 'no-cors', cache: 'no-store' });
-            const duration = Math.floor(performance.now() - startTime);
-            
-            document.querySelectorAll('.live-ping-text').forEach(el => {
-                el.innerText = duration + ' ms';
-            });
-            document.getElementById('sheet-ping').innerText = duration + ' ms';
-        } catch (error) {
-            document.querySelectorAll('.live-ping-text').forEach(el => {
-                el.innerText = 'Timeout';
-            });
-        }
-    }
-
-    // --- سیستم ترافیک مصرفی داینامیک ---
-    function startTrafficSimulation() {
-        if(trafficInterval) clearInterval(trafficInterval);
-        trafficInterval = setInterval(() => {
-            if(isConnected) {
-                let addedVolume = (Math.random() * 0.02).toFixed(3);
-                totalDownload = parseFloat((totalDownload + parseFloat(addedVolume)).toFixed(2));
-                
-                const cells = document.querySelectorAll('.settings-cell');
-                cells.forEach(cell => {
-                    if(cell.innerText.includes('Total Download')) {
-                        cell.querySelector('.cell-val').innerText = totalDownload + ' GB';
-                    }
-                });
-                renderDynamicGraph();
-            }
-        }, 1000);
-    }
-
-    function renderDynamicGraph() {
-        const g = document.getElementById('dataGraph');
-        g.innerHTML = '';
-        let baseData = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, totalDownload];
-        const m = Math.max(...baseData) || 1;
-        baseData.forEach(v => {
-            g.innerHTML += `<div class="bar" style="height:${(v/m)*100}%"><span>${v.toFixed(1)}G</span></div>`;
-        });
-    }
-
-    window.onload = () => { 
-        checkEmptyState();
-        renderDynamicGraph();
-        setInterval(checkRealPing, 5000);
-    };
-
+    window.onload = () => { addNode('Aether Premium Server', 'VLESS'); addNode('Germany Direct Bypass', 'TROJAN'); renderGraph(); };
     let currentEditingNodeId = null;
 
     function addNode(title, method) {
         const container = document.getElementById('nodeListContainer');
-        // حذف پیام خالی بودن در صورت وجود
-        const msg = document.getElementById('empty-state-msg');
-        if (msg) msg.remove();
-
         const nodeId = 'node-' + Math.floor(Math.random() * 10000);
         const html = `
             <div class="swipe-wrapper" id="wrap-${nodeId}">
                 <div class="swipe-actions">
                     <div class="action-circle btn-copy" onclick="alert('Copied to clipboard!')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
                     <div class="action-circle btn-edit" onclick="launchEditModal(event, '${nodeId}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div>
-                    <div class="action-circle btn-delete" onclick="document.getElementById('wrap-${nodeId}').remove(); checkEmptyState();"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
+                    <div class="action-circle btn-delete" onclick="document.getElementById('wrap-${nodeId}').remove()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
                 </div>
                 <div class="config-node-card collapsed" id="${nodeId}" onclick="openSheet('${title}')">
                     <div class="quota-header-container">
@@ -589,7 +495,6 @@
             </div>`;
         container.insertAdjacentHTML('beforeend', html);
         initSwipe(nodeId);
-        checkRealPing();
     }
 
     function toggleCollapse(e, id) { e.stopPropagation(); document.getElementById(id).classList.toggle('collapsed'); }
@@ -598,6 +503,18 @@
     function openSheet(title) { document.getElementById('sheet-title').innerText = title; document.getElementById('appstoreOverlay').classList.add('open'); document.body.classList.add('modal-open'); }
     function closeAppStoreSheet() { document.getElementById('appstoreOverlay').classList.remove('open'); document.body.classList.remove('modal-open'); }
 
+    setInterval(() => {
+        document.querySelectorAll('.live-ping-text').forEach(el => {
+            const p = Math.floor(Math.random() * 60 + 40); el.innerText = p + ' ms'; document.getElementById('sheet-ping').innerText = p + ' ms';
+        });
+    }, 2000);
+
+    function renderGraph() {
+        const d = [1.2, 2.5, 0.8, 4.1, 3.0, 1.5, 2.2]; const m = Math.max(...d); const g = document.getElementById('dataGraph');
+        g.innerHTML = ''; d.forEach(v => g.innerHTML += `<div class="bar" style="height:${(v/m)*100}%"><span>${v}G</span></div>`);
+    }
+
+    // --- منطق هوشمندانه و بدون باگ Swipe ---
     function initSwipe(id) {
         const card = document.getElementById(id); 
         const wrapper = document.getElementById('wrap-' + id);
@@ -616,51 +533,46 @@
         card.addEventListener('touchmove', e => { 
             let diffX = e.touches[0].clientX - startX;
             let diffY = e.touches[0].clientY - startY;
+
+            // تشخیص اسکرول عمودی (جلوگیری از درگیر شدن اسوایپ)
             if (!isSwiping && Math.abs(diffY) > Math.abs(diffX)) { isScrolling = true; return; }
             if (isScrolling) return;
+
             isSwiping = true;
             currentX = e.touches[0].clientX; 
+
             if (diffX < 0 && diffX > -190) { 
                 card.style.transform = `translate3d(${diffX}px, 0, 0)`; 
-                actions.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                actions.style.opacity = Math.min(1, Math.abs(diffX) / 100); // ظاهر شدن نرم دکمه‌ها
             } 
         }, {passive:true});
         
         card.addEventListener('touchend', e => { 
-            if (!isSwiping) return;
+            if (!isSwiping) return; // اگر فقط کلیک/تپ بوده، هیچ کاری نکن
+
             let diffX = currentX - startX;
             card.style.transition = 'transform 0.5s var(--apple-spring)'; 
+            
             if (diffX < -70) { 
+                // قفل شدن در حالت باز
                 card.style.transform = 'translate3d(-175px, 0, 0)'; 
                 actions.style.opacity = '1';
-                actions.style.pointerEvents = 'auto'; 
+                actions.style.pointerEvents = 'auto'; // فقط حالا دکمه‌ها قابل کلیک می‌شوند
             } else { 
+                // برگشت به حالت اولیه
                 card.style.transform = 'translate3d(0, 0, 0)'; 
                 actions.style.opacity = '0';
-                actions.style.pointerEvents = 'none'; 
+                actions.style.pointerEvents = 'none'; // غیرفعال شدن دکمه‌ها
             } 
         });
     }
 
+    let isConnected = false;
     function toggleConnection() {
-        const container = document.getElementById('nodeListContainer');
-        if (container.querySelector('.config-node-card') === null && !isConnected) {
-            alert(currentLang === 'fa' ? "لطفاً ابتدا یک سرور اضافه کنید!" : "Please add a server first!");
-            return;
-        }
-
-        isConnected = !isConnected; 
-        document.getElementById('powerBtn').classList.toggle('active', isConnected);
+        isConnected = !isConnected; document.getElementById('powerBtn').classList.toggle('active', isConnected);
         document.getElementById('statusLabel').innerText = i18nData[currentLang][isConnected ? 'connected' : 'disconnected'];
         document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
-        
-        if(isConnected) {
-            startTrafficSimulation();
-        } else {
-            if(trafficInterval) clearInterval(trafficInterval);
-        }
     }
-
 </script>
 </body>
 </html>
