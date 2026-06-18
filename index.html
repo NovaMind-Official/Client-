@@ -40,6 +40,10 @@
         body[dir="rtl"] .plus-item { flex-direction: row-reverse; text-align: right; }
         body[dir="rtl"] .node-details { flex-direction: row-reverse; }
         body[dir="rtl"] .node-title-container { text-align: right; }
+        body[dir="rtl"] .settings-section-header { margin: 28px 18px 10px 0; text-align: right; }
+        body[dir="rtl"] .cell-label-desc { text-align: right; }
+        body[dir="rtl"] .swipe-actions { right: auto; left: 0; justify-content: flex-start; padding-right: 0; padding-left: 18px; }
+        body[dir="rtl"] .modern-input-field { text-align: right; }
 
         .ambient { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
         .blur-orb { position: absolute; border-radius: 50%; filter: blur(140px); opacity: 0.15; transition: all 1s ease; }
@@ -107,8 +111,6 @@
             display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 18px; 
             opacity: 0; pointer-events: none; transition: opacity 0.3s var(--apple-fluid); z-index: 1; 
         }
-        body[dir="rtl"] .swipe-actions { right: auto; left: 0; justify-content: flex-start; padding-right: 0; padding-left: 18px; }
-        
         .action-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; cursor: pointer; transition: transform 0.2s var(--apple-spring); }
         .action-circle:active { transform: scale(0.85); }
         .btn-copy { background: #5856d6; }
@@ -161,8 +163,6 @@
         .modal-scrollable-body { padding: 0 16px 40px 16px; overflow-y: auto; flex: 1; scroll-behavior: smooth; }
 
         .settings-section-header { font-size: 0.75rem; color: var(--text-sub); margin: 28px 0 10px 18px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-        body[dir="rtl"] .settings-section-header { margin: 28px 18px 10px 0; text-align: right; }
-        
         .settings-card-group { background: var(--ipad-layer); border-radius: 20px; overflow: hidden; border: var(--border-thin-apple); box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .settings-cell { padding: 16px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: var(--border-thin-apple); font-size: 1rem; cursor: pointer; transition: background 0.3s; font-weight: 500; }
         .settings-cell:last-child { border-bottom: none; }
@@ -183,12 +183,23 @@
         .ios-switch input:active + .ios-slider:before { width: 32px; }
         .ios-switch input:checked:active + .ios-slider:before { transform: translateX(14px); width: 32px; }
         
+        .modern-range-slider { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(120,120,128,0.32); border-radius: 3px; outline: none; margin: 10px 0; }
+        .modern-range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: white; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s; }
+        
         .modern-input-field { width: 100%; background: rgba(120,120,128,0.16); border: 1px solid transparent; color: var(--text-main); padding: 16px; border-radius: 14px; font-size: 1rem; font-weight: 500; outline: none; transition: border-color 0.3s, background 0.3s; }
-        body[dir="rtl"] .modern-input-field { text-align: right; }
         .modern-input-field:focus { border-color: var(--accent-blue); background: rgba(120,120,128,0.25); }
         
         .primary-btn { width: 100%; padding: 18px; border-radius: 16px; background: var(--accent-blue); color: white; font-weight: 700; font-size: 1.05rem; border: none; margin-top: 25px; cursor: pointer; transition: transform 0.3s var(--apple-spring), background 0.3s; box-shadow: 0 8px 20px rgba(10, 132, 255, 0.3); }
         .primary-btn:active { transform: scale(0.95); background: #007aff; }
+
+        /* استایل‌های مصرف 7 روزه (بازگردانی شده) */
+        .appstore-expanded-overlay { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3000; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(25px); opacity: 0; pointer-events: none; transition: opacity 0.5s ease; display: flex; flex-direction: column; justify-content: flex-end; }
+        .appstore-expanded-overlay.open { opacity: 1; pointer-events: auto; }
+        .appstore-card-sheet { background: var(--bg-base); color: var(--text-main); border-top-left-radius: 36px; border-top-right-radius: 36px; width: 100%; height: 88vh; transform: translate3d(0, 100%, 0); transition: transform 0.65s var(--apple-spring); display: flex; flex-direction: column; overflow: hidden; border-top: var(--border-thin-apple); box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
+        .appstore-expanded-overlay.open .appstore-card-sheet { transform: translate3d(0, 0, 0); }
+        .real-data-graph { height: 160px; background: rgba(120,120,128,0.12); border-radius: 20px; margin-top: 20px; display: flex; align-items: flex-end; padding: 15px; gap: 10px; }
+        .bar { flex: 1; background: linear-gradient(to top, var(--accent-blue), #5ac8fa); border-radius: 6px; position: relative; transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .bar span { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; color: var(--text-sub); }
     </style>
 </head>
 <body dir="ltr">
@@ -238,24 +249,33 @@
     </div>
     <div class="modal-scrollable-body" style="padding-top: 20px;">
         <div class="settings-card-group" style="padding: 20px; display:flex; flex-direction:column; gap:18px;">
-            <div>
-                <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="remark">Remark (Name)</p>
-                <input type="text" id="new-node-name" class="modern-input-field">
-            </div>
+            <div><p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="remark">Remark (Name)</p><input type="text" id="new-node-name" class="modern-input-field"></div>
             <div>
                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="protocol">Protocol Type</p>
                 <select id="new-node-protocol" class="modern-input-field" style="appearance: none;">
-                    <option value="VLESS">VLESS</option>
-                    <option value="TROJAN">TROJAN</option>
-                    <option value="VMESS">VMESS</option>
+                    <option value="VLESS">VLESS</option><option value="TROJAN">TROJAN</option><option value="VMESS">VMESS</option>
                 </select>
             </div>
-            <div>
-                <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="configLink">Config Link</p>
-                <textarea id="new-node-link" class="modern-input-field" style="height:100px; resize:none;"></textarea>
-            </div>
+            <div><p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="configLink">Config Link / URI</p><textarea id="new-node-link" class="modern-input-field" style="height:100px; resize:none;"></textarea></div>
         </div>
         <button class="primary-btn" onclick="saveNewConfig()" data-i18n="saveConfig">Save & Import</button>
+    </div>
+</div>
+
+<div class="fullscreen-modal" id="modal-edit-node">
+    <div class="modal-navbar">
+        <div class="modal-dismiss" onclick="closeModal('modal-edit-node')" data-i18n="cancel">Cancel</div>
+        <div class="modal-headline" data-i18n="editConfig">Edit Configuration</div>
+        <div style="width:60px"></div>
+    </div>
+    <div class="modal-scrollable-body" style="padding-top: 20px;">
+        <div class="settings-card-group" style="padding: 20px; display:flex; flex-direction:column; gap:18px;">
+            <div><p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="remark">Remark (Name)</p><input type="text" id="edit-node-name" class="modern-input-field"></div>
+            <div><p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="address">Address (IP/Domain)</p><input type="text" id="edit-node-address" class="modern-input-field" value="104.21.43.11"></div>
+            <div><p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="port">Port</p><input type="number" id="edit-node-port" class="modern-input-field" value="443"></div>
+            <div><p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="uuid">UUID</p><input type="text" class="modern-input-field" value="b839-4f...-a92c"></div>
+        </div>
+        <button class="primary-btn" onclick="saveNodeChanges()" data-i18n="applyChanges">Apply & Save Changes</button>
     </div>
 </div>
 
@@ -266,24 +286,112 @@
         <div style="width:50px"></div>
     </div>
     <div class="modal-scrollable-body">
+        
         <div class="settings-section-header" data-i18n="uiSettings">UI Settings</div>
         <div class="settings-card-group">
             <div class="settings-cell"><span data-i18n="language">Language</span> 
                 <div class="cell-val">
                     <select class="native-select" onchange="changeLanguage(this.value)">
-                        <option value="en" data-i18n="langEn">English</option>
-                        <option value="fa" data-i18n="langFa">Persian (فارسی)</option>
+                        <option value="en" data-i18n="langEn">English</option><option value="fa" data-i18n="langFa">Persian (فارسی)</option>
                     </select>
                 </div>
             </div>
-            <div class="settings-cell"><span data-i18n="appTheme">App Theme</span> 
+            <div class="settings-cell"><span data-i18n="appTheme">App Appearance</span> 
                 <div class="cell-val">
                     <select class="native-select" onchange="toggleTheme(this.value)">
-                        <option value="dark" data-i18n="themeDark">Dark</option>
-                        <option value="light" data-i18n="themeLight">Light</option>
+                        <option value="dark" data-i18n="themeDark">Dark</option><option value="light" data-i18n="themeLight">Light</option>
                     </select>
                 </div>
             </div>
+            <div class="settings-cell"><span data-i18n="btnSize">Button Size</span> <div class="cell-val"><span style="color:var(--accent-purple)" data-i18n="sizeSmall">Small</span></div></div>
+            <div class="settings-cell"><span data-i18n="floatBtn">Floating Button</span> <label class="ios-switch"><input type="checkbox" checked><span class="ios-slider"></span></label></div>
+        </div>
+        
+        <div class="settings-section-header" data-i18n="tunnelSettings">Tunnel Settings</div>
+        <div class="settings-card-group">
+            <div class="settings-cell"><span data-i18n="routingRules">Routing Rules</span> <div class="cell-val chevron-right">IR-Direct-OPVPN</div></div>
+            <div class="settings-cell"><span data-i18n="frag">Enable Fragmentation</span> <label class="ios-switch"><input type="checkbox"><span class="ios-slider"></span></label></div>
+            <div class="settings-cell"><span data-i18n="mux">Enable Mux</span> <label class="ios-switch"><input type="checkbox"><span class="ios-slider"></span></label></div>
+            <div class="settings-cell"><span data-i18n="prefIp">Preferred IP Type</span> <div class="cell-val"><span style="color:var(--accent-purple)">IPv4</span></div></div>
+            <div class="settings-cell"><span data-i18n="onDemand">On Demand</span> <div class="cell-val chevron-right"></div></div>
+        </div>
+
+        <div class="settings-section-header" data-i18n="advSettings">Advanced Settings</div>
+        <div class="settings-card-group">
+            <div class="settings-cell" onclick="openModal('modal-dev-settings')"><span data-i18n="devSettings">Dev Settings</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell"><span data-i18n="subs">Subscriptions</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell"><span data-i18n="pingSet">Ping</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell"><span data-i18n="lan">Allow connections from LAN</span> <label class="ios-switch"><input type="checkbox"><span class="ios-slider"></span></label></div>
+        </div>
+
+        <div class="settings-section-header" data-i18n="otherSettings">Other Settings</div>
+        <div class="settings-card-group">
+            <div class="settings-cell"><span data-i18n="stats">Statistics</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell"><span data-i18n="logs">Logs</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell" style="color:var(--danger);"><span data-i18n="reset">Reset</span> <div class="cell-val chevron-right"></div></div>
+        </div>
+
+        <div class="settings-section-header" data-i18n="aboutHead">About</div>
+        <div class="settings-card-group">
+            <div class="settings-cell"><span data-i18n="faq">FAQ</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell"><span data-i18n="urlScheme">URL Schemes</span> <div class="cell-val chevron-right"></div></div>
+            <div class="settings-cell"><span data-i18n="aboutApp">About</span> <div class="cell-val chevron-right"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="fullscreen-modal" id="modal-dev-settings" style="z-index:2001;">
+    <div class="modal-navbar">
+        <div class="modal-dismiss" onclick="closeModal('modal-dev-settings')" data-i18n="backSettings">‹ Settings</div>
+        <div class="modal-headline" data-i18n="devSettings">Dev Settings</div>
+        <div style="width:65px"></div>
+    </div>
+    <div class="modal-scrollable-body">
+        <div class="settings-section-header" data-i18n="devSettings">Dev Settings</div>
+        <div class="settings-card-group" style="padding: 16px 18px;">
+            <div style="display:flex; justify-content:space-between; font-size:1rem; margin-bottom:12px; font-weight:500;">
+                <span data-i18n="memLimit">Xray memory limit</span>
+                <span style="color:var(--text-sub)">45MB</span>
+            </div>
+            <input type="range" class="modern-range-slider" min="40" max="50" value="45">
+            <div class="cell-label-desc" data-i18n="memDesc">This is soft memory limit for xray core. If your connection drops frequently - lower memory limit value</div>
+            
+            <div class="settings-cell" style="padding:16px 0 0 0; margin-top:18px; border-top:var(--border-thin-apple)">
+                <span data-i18n="idleOut">Connection Idle timeout</span><div class="cell-val">300</div>
+            </div>
+            <div class="settings-cell" style="padding:16px 0 0 0;">
+                <span data-i18n="tcpMax">Tcp Max Connections</span><div class="cell-val">256</div>
+            </div>
+            <div class="settings-cell" style="padding:16px 0 0 0;">
+                <span data-i18n="udpMax">Udp Max Connections</span><div class="cell-val">128</div>
+            </div>
+            <div class="settings-cell" style="padding:16px 0 0 0;">
+                <span data-i18n="sniff">Enable Sniffing</span><label class="ios-switch"><input type="checkbox" checked><span class="ios-slider"></span></label>
+            </div>
+        </div>
+
+        <div class="settings-section-header" data-i18n="ramUse">Ram Usage</div>
+        <div class="settings-card-group">
+            <div class="settings-cell"><span data-i18n="showMon">Show monitoring on main screen</span> <label class="ios-switch"><input type="checkbox"><span class="ios-slider"></span></label></div>
+            <div class="settings-cell"><span data-i18n="memUse">Memory Usage</span> <div class="cell-val">0.0 Mb</div></div>
+        </div>
+
+        <div class="settings-section-header" data-i18n="exclRoutes">Excluded routes</div>
+        <div class="settings-card-group">
+            <div class="settings-cell"><span data-i18n="exclRoutes">Excluded routes</span> <div class="cell-val chevron-right"></div></div>
+            <div style="padding:12px 18px; font-size:0.8rem; color:var(--text-sub)" data-i18n="exclDesc">List of IPs to be excluded from tunnel<br>Note: You can exclude APNs or Private/Local IPs using presets.</div>
+        </div>
+
+        <div class="settings-card-group" style="margin-top:20px;">
+            <div class="settings-cell"><span data-i18n="incAllNet">Include All Networks</span> <label class="ios-switch"><input type="checkbox"><span class="ios-slider"></span></label></div>
+        </div>
+
+        <div class="settings-card-group" style="margin-top:20px;">
+            <div class="settings-cell">
+                <div data-i18n="sleepDis">Disconnect on sleep</div>
+                <label class="ios-switch"><input type="checkbox"><span class="ios-slider"></span></label>
+            </div>
+            <div style="padding:12px 18px; font-size:0.8rem; color:var(--text-sub)" data-i18n="sleepDesc">Automatically disconnects TUNNEL when your device goes to sleep to extend battery life.</div>
         </div>
     </div>
 </div>
@@ -304,8 +412,26 @@
     </div>
 </div>
 
+<div class="appstore-expanded-overlay" id="appstoreOverlay" onclick="closeAppStoreSheet()">
+    <div class="appstore-card-sheet" onclick="event.stopPropagation()">
+        <div style="padding: 30px; border-bottom: var(--border-thin-apple); display: flex; justify-content: space-between; align-items: center;">
+            <div><span style="font-size:0.8rem; color:var(--text-sub); font-weight:600; letter-spacing:1px;" data-i18n="aetherNode">AETHER NODE</span><h2 id="sheet-title" style="font-size:1.7rem; font-weight:800; margin-top:4px;">Node Name</h2></div>
+            <div class="modal-dismiss" style="background: rgba(120,120,128,0.16); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--text-sub);" onclick="closeAppStoreSheet()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+        </div>
+        <div style="padding: 25px; overflow-y: auto;">
+            <p style="font-size:0.95rem; font-weight:600; color:var(--text-sub);" data-i18n="usage7d">7-Day Real Traffic Usage</p>
+            <div class="real-data-graph" id="dataGraph"></div>
+            <div class="settings-card-group" style="margin-top: 25px;">
+                <div class="settings-cell"><span data-i18n="protocol">Protocol</span> <div class="cell-val" style="font-weight:600; color:var(--text-main);">VLESS TCP</div></div>
+                <div class="settings-cell"><span data-i18n="totDl">Total Download</span> <div class="cell-val" style="font-weight:600; color:var(--text-main);">12.4 GB</div></div>
+                <div class="settings-cell"><span data-i18n="currPing">Current Ping</span> <div class="cell-val" style="color:var(--success); font-weight:700;" id="sheet-ping">-- ms</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // دیکشنری فوق‌جامع (هیچ متن انگلیسی بدون ترجمه نمانده است)
+    // دیکشنری فوق‌جامع (پشتیبانی از تمام منوهای تنظیمات و ادیت)
     const translations = {
         en: {
             subUrl: "Subscription URL", importClip: "Import from clipboard", importFile: "Import from File", qrCode: "QR-Code Scanner", manual: "Manual input",
@@ -313,47 +439,58 @@
             protocol: "Protocol Type", configLink: "Config Link / URI", saveConfig: "Save & Import", back: "‹ Back", settings: "Settings", 
             uiSettings: "UI Settings", language: "Language", appTheme: "App Appearance", close: "Close", hotspot: "Hotspot Engine", enableHotspot: "Enable Hotspot",
             emptyState: "No servers added yet. Tap + to import.", copied: "Copied!", offline: "Offline", active: "Active", timeout: "Timeout", errorLink: "Please enter config link!",
-            langEn: "English", langFa: "Persian (فارسی)", themeDark: "Dark", themeLight: "Light", errFirst: "Add a server first!", camErr: "Camera scanner reserved for Android build."
+            langEn: "English", langFa: "Persian (فارسی)", themeDark: "Dark", themeLight: "Light", errFirst: "Add a server first!", camErr: "Camera scanner reserved for Android build.",
+            btnSize: "Button Size", sizeSmall: "Small", floatBtn: "Floating Button", tunnelSettings: "Tunnel Settings", routingRules: "Routing Rules", frag: "Enable Fragmentation",
+            mux: "Enable Mux", prefIp: "Preferred IP Type", onDemand: "On Demand", advSettings: "Advanced Settings", devSettings: "Dev Settings", subs: "Subscriptions", pingSet: "Ping",
+            lan: "Allow connections from LAN", otherSettings: "Other Settings", stats: "Statistics", logs: "Logs", reset: "Reset", aboutHead: "About", faq: "FAQ", urlScheme: "URL Schemes",
+            aboutApp: "About App", backSettings: "‹ Settings", memLimit: "Xray memory limit", memDesc: "This is soft memory limit for xray core. If your connection drops frequently - lower memory limit value.",
+            idleOut: "Connection Idle timeout", tcpMax: "Tcp Max Connections", udpMax: "Udp Max Connections", sniff: "Enable Sniffing", ramUse: "Ram Usage", showMon: "Show monitoring on main screen",
+            memUse: "Memory Usage", exclRoutes: "Excluded routes", exclDesc: "List of IPs to be excluded from tunnel", incAllNet: "Include All Networks", sleepDis: "Disconnect on sleep",
+            sleepDesc: "Automatically disconnects TUNNEL when your device goes to sleep to extend battery life.", editConfig: "Edit Configuration", address: "Address (IP/Domain)",
+            port: "Port", uuid: "UUID", applyChanges: "Apply & Save Changes", aetherNode: "AETHER NODE", usage7d: "7-Day Real Traffic Usage", totDl: "Total Download", currPing: "Current Ping"
         },
         fa: {
             subUrl: "لینک اشتراک", importClip: "وارد کردن از کلیپ‌بورد", importFile: "انتخاب فایل کانفیگ", qrCode: "اسکن بارکد (دوربین)", manual: "ساخت دستی کانفیگ",
             disconnected: "قطع اتصال", connected: "متصل شد", cancel: "لغو", newConfig: "افزودن سرور جدید", remark: "نام سرور (دلخواه)", 
-            protocol: "نوع پروتکل", configLink: "لینک کانفیگ (vless://)", saveConfig: "ذخیره و افزودن به لیست", back: "‹ بازگشت", settings: "تنظیمات برنامه", 
+            protocol: "نوع پروتکل", configLink: "لینک کانفیگ (vless://)", saveConfig: "ذخیره و افزودن به لیست", back: "‹ بازگشت", settings: "تنظیمات", 
             uiSettings: "تنظیمات ظاهری", language: "زبان برنامه", appTheme: "تم برنامه", close: "بستن", hotspot: "هات‌اسپات", enableHotspot: "روشن کردن هات‌اسپات",
             emptyState: "لیست سرورها خالی است. برای افزودن روی + بزنید.", copied: "کپی شد!", offline: "آفلاین", active: "فعال", timeout: "خطای اتصال", errorLink: "لطفا لینک کانفیگ را وارد کنید!",
-            langEn: "انگلیسی", langFa: "فارسی", themeDark: "تاریک", themeLight: "روشن", errFirst: "ابتدا یک سرور اضافه کنید!", camErr: "دسترسی دوربین در نسخه نهایی فعال می‌شود."
+            langEn: "انگلیسی", langFa: "فارسی", themeDark: "تاریک", themeLight: "روشن", errFirst: "ابتدا یک سرور اضافه کنید!", camErr: "دسترسی دوربین در نسخه نهایی فعال می‌شود.",
+            btnSize: "اندازه دکمه‌ها", sizeSmall: "کوچک", floatBtn: "دکمه شناور", tunnelSettings: "تنظیمات تونل", routingRules: "قوانین مسیریابی", frag: "فعال‌سازی Fragmentation",
+            mux: "فعال‌سازی Mux", prefIp: "نوع IP ترجیحی", onDemand: "اتصال خودکار", advSettings: "تنظیمات پیشرفته", devSettings: "تنظیمات توسعه‌دهنده", subs: "اشتراک‌ها", pingSet: "تست پینگ",
+            lan: "اجازه اتصال از شبکه محلی (LAN)", otherSettings: "سایر تنظیمات", stats: "آمار مصرف", logs: "لاگ سیستم", reset: "بازنشانی تنظیمات", aboutHead: "درباره", faq: "سوالات متداول", urlScheme: "URL Schemes",
+            aboutApp: "درباره برنامه", backSettings: "‹ تنظیمات", memLimit: "محدودیت حافظه Xray", memDesc: "این محدودیت نرم‌افزاری هسته است. در صورت قطعی مکرر، مقدار آن را کم کنید.",
+            idleOut: "زمان تایم‌اوت اتصال", tcpMax: "حداکثر اتصال TCP", udpMax: "حداکثر اتصال UDP", sniff: "فعال‌سازی Sniffing", ramUse: "مصرف رم", showMon: "نمایش مصرف در صفحه اصلی",
+            memUse: "حافظه درگیر", exclRoutes: "مسیرهای مستثنی شده", exclDesc: "لیست IP هایی که نباید از تونل عبور کنند", incAllNet: "شامل تمام شبکه‌ها", sleepDis: "قطع اتصال در حالت خواب",
+            sleepDesc: "برای کاهش مصرف باتری، با خاموش شدن صفحه اتصال قطع می‌شود.", editConfig: "ویرایش کانفیگ", address: "آدرس (آی‌پی یا دامنه)",
+            port: "پورت (درگاه)", uuid: "شناسه کاربری (UUID)", applyChanges: "اعمال و ذخیره تغییرات", aetherNode: "گره اتصال", usage7d: "مصرف ترافیک در ۷ روز گذشته", totDl: "کل دانلود", currPing: "پینگ فعلی"
         }
     };
     
     let currentLang = 'en';
     let isConnected = false;
+    let currentEditingNodeId = null;
 
-    // تابع تغییر زبان همه‌جانبه
     function changeLanguage(lang) {
         currentLang = lang;
         document.body.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr');
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (translations[lang][key]) {
-                // اگر تگ option است باید text آن تغییر کند
                 if(el.tagName === 'OPTION') el.text = translations[lang][key];
                 else el.innerText = translations[lang][key];
             }
         });
         checkEmptyState();
         document.getElementById('statusLabel').innerText = translations[lang][isConnected ? 'connected' : 'disconnected'];
-        
-        // آپدیت کردن متن‌های داخل کارت‌ها
         document.querySelectorAll('.node-status-text').forEach(el => el.innerText = translations[lang].active);
     }
 
-    // رفع باگ باز نشدن منوی پلاس
     function togglePlusMenu(event) {
-        event.stopPropagation(); // این خط معجزه می‌کند و اجازه نمی‌دهد کلیک به بدنه صفحه منتقل شود
+        event.stopPropagation(); 
         document.getElementById('plusMenu').classList.toggle('active');
     }
 
-    // بستن منو با کلیک روی هر جای دیگر
     window.addEventListener('click', (e) => { 
         const menu = document.getElementById('plusMenu');
         if (menu && menu.classList.contains('active') && !e.target.closest('.plus-dropdown')) {
@@ -363,7 +500,6 @@
 
     async function triggerMenuAction(action) {
         document.getElementById('plusMenu').classList.remove('active');
-
         setTimeout(async () => {
             if (action === 'Manual Input') {
                 document.getElementById('new-node-link').value = '';
@@ -374,15 +510,11 @@
                     const text = await navigator.clipboard.readText();
                     document.getElementById('new-node-link').value = text || '';
                     openModal('modal-add-config');
-                } catch (e) {
-                    openModal('modal-add-config');
-                }
+                } catch (e) { openModal('modal-add-config'); }
             }
             else if (action === 'Import from File') {
                 const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.txt,.json';
-                input.click();
+                input.type = 'file'; input.accept = '.txt,.json'; input.click();
                 input.onchange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -395,28 +527,21 @@
                     reader.readAsText(file);
                 };
             }
-            else if (action === 'QR-Code Scanner') {
-                alert(translations[currentLang].camErr);
-            }
+            else if (action === 'QR-Code Scanner') { alert(translations[currentLang].camErr); }
         }, 150);
     }
 
-    // ذخیره کانفیگ جدید
     function saveNewConfig() {
         const name = document.getElementById('new-node-name').value || "Aether Node";
         const protocol = document.getElementById('new-node-protocol').value;
         const link = document.getElementById('new-node-link').value;
-
         if(!link) { alert(translations[currentLang].errorLink); return; }
-
         addNode(name, protocol);
         closeModal('modal-add-config');
-        
-        document.getElementById('new-node-name').value = '';
-        document.getElementById('new-node-link').value = '';
+        document.getElementById('new-node-name').value = ''; document.getElementById('new-node-link').value = '';
     }
 
-    // افزودن کارت
+    // اضافه شدن مجدد دکمه ادیت و عملکرد باز شدن مصرف 7 روزه با کلیک روی کارت
     function addNode(title, method) {
         const container = document.getElementById('nodeListContainer');
         const msg = document.getElementById('empty-state-msg');
@@ -424,16 +549,18 @@
 
         const nodeId = 'node-' + Math.floor(Math.random() * 10000);
         const activeText = translations[currentLang].active;
+        const copiedText = translations[currentLang].copied;
         const html = `
             <div class="swipe-wrapper" id="wrap-${nodeId}">
                 <div class="swipe-actions">
-                    <div class="action-circle btn-copy" onclick="alert(translations[currentLang].copied)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                    <div class="action-circle btn-copy" onclick="alert('${copiedText}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                    <div class="action-circle btn-edit" onclick="launchEditModal(event, '${nodeId}')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div>
                     <div class="action-circle btn-delete" onclick="document.getElementById('wrap-${nodeId}').remove(); checkEmptyState();"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
                 </div>
-                <div class="config-node-card collapsed" id="${nodeId}">
-                    <div class="quota-header-container" onclick="document.getElementById('${nodeId}').classList.toggle('collapsed')">
+                <div class="config-node-card collapsed" id="${nodeId}" onclick="openSheet('${title}')">
+                    <div class="quota-header-container">
                         <div class="node-title-container"><div class="node-title-label">${title}</div><div class="node-type-label">${method}</div></div>
-                        <div class="config-collapse-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+                        <div class="config-collapse-arrow" onclick="toggleCollapse(event, '${nodeId}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
                     </div>
                     <div class="card-foldable-zone"><div class="foldable-inner"><div class="node-details"><span class="node-status-text" style="color:var(--text-sub)">${activeText}</span><div class="live-ping-box"><div class="ping-dot"></div><span class="live-ping-text">...</span></div></div></div></div>
                 </div>
@@ -442,6 +569,15 @@
         initSwipe(nodeId);
         checkRealPing();
     }
+
+    function toggleCollapse(e, id) { e.stopPropagation(); document.getElementById(id).classList.toggle('collapsed'); }
+    
+    // توابع نمودار و ادیت بازگردانی شدند
+    function openSheet(title) { document.getElementById('sheet-title').innerText = title; document.getElementById('appstoreOverlay').classList.add('open'); document.body.classList.add('modal-open'); }
+    function closeAppStoreSheet() { document.getElementById('appstoreOverlay').classList.remove('open'); document.body.classList.remove('modal-open'); }
+    
+    function launchEditModal(event, id) { event.stopPropagation(); currentEditingNodeId = id; document.getElementById('edit-node-name').value = document.getElementById(id).querySelector('.node-title-label').innerText; openModal('modal-edit-node'); document.getElementById(id).style.transform = 'translate3d(0,0,0)'; }
+    function saveNodeChanges() { if(currentEditingNodeId) { document.getElementById(currentEditingNodeId).querySelector('.node-title-label').innerText = document.getElementById('edit-node-name').value; closeModal('modal-edit-node'); } }
 
     function checkEmptyState() {
         const container = document.getElementById('nodeListContainer');
@@ -452,57 +588,45 @@
 
     function toggleTheme(theme) { theme === 'light' ? document.body.classList.add('light-mode') : document.body.classList.remove('light-mode'); }
     function openModal(id) { document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); if(id!=='modal-dev-settings') document.body.classList.remove('modal-open'); }
     
     function toggleConnection() {
-        if (document.getElementById('nodeListContainer').querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) {
-            alert(translations[currentLang].errFirst); return;
-        }
-        isConnected = !isConnected; 
-        document.getElementById('powerBtn').classList.toggle('active', isConnected);
+        if (document.getElementById('nodeListContainer').querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) { alert(translations[currentLang].errFirst); return; }
+        isConnected = !isConnected; document.getElementById('powerBtn').classList.toggle('active', isConnected);
         document.getElementById('statusLabel').innerText = translations[currentLang][isConnected ? 'connected' : 'disconnected'];
         document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
     }
 
     function initSwipe(id) {
-        const card = document.getElementById(id); 
-        const wrapper = document.getElementById('wrap-' + id);
-        const actions = wrapper.querySelector('.swipe-actions');
-        let startX = 0, currentX = 0, isSwiping = false;
+        const card = document.getElementById(id); const wrapper = document.getElementById('wrap-' + id); const actions = wrapper.querySelector('.swipe-actions');
+        let startX = 0, currentX = 0, isSwiping = false, isScrolling = false;
 
-        card.addEventListener('touchstart', e => { startX = e.touches[0].clientX; card.style.transition = 'none'; isSwiping = false; }, {passive:true});
+        card.addEventListener('touchstart', e => { startX = e.touches[0].clientX; card.style.transition = 'none'; isSwiping = false; isScrolling = false; }, {passive:true});
         card.addEventListener('touchmove', e => { 
             let diff = e.touches[0].clientX - startX;
             let dir = document.body.getAttribute('dir');
-            if ((dir === 'ltr' && diff < 0 && diff > -130) || (dir === 'rtl' && diff > 0 && diff < 130)) { 
+            if ((dir === 'ltr' && diff < 0 && diff > -190) || (dir === 'rtl' && diff > 0 && diff < 190)) { 
                 isSwiping = true; currentX = diff; card.style.transform = `translate3d(${diff}px, 0, 0)`; actions.style.opacity = Math.abs(diff) / 100;
             } 
         }, {passive:true});
         card.addEventListener('touchend', e => { 
-            if (!isSwiping) return;
-            card.style.transition = 'transform 0.5s var(--apple-spring)'; 
-            if (Math.abs(currentX) > 60) { 
-                let finalX = document.body.getAttribute('dir') === 'rtl' ? 120 : -120;
-                card.style.transform = `translate3d(${finalX}px, 0, 0)`; actions.style.opacity = '1'; actions.style.pointerEvents = 'auto'; 
-            } else { card.style.transform = 'translate3d(0, 0, 0)'; actions.style.opacity = '0'; actions.style.pointerEvents = 'none'; } 
+            if (!isSwiping) return; card.style.transition = 'transform 0.5s var(--apple-spring)'; 
+            if (Math.abs(currentX) > 60) { let finalX = document.body.getAttribute('dir') === 'rtl' ? 175 : -175; card.style.transform = `translate3d(${finalX}px, 0, 0)`; actions.style.opacity = '1'; actions.style.pointerEvents = 'auto'; } 
+            else { card.style.transform = 'translate3d(0, 0, 0)'; actions.style.opacity = '0'; actions.style.pointerEvents = 'none'; } 
         });
     }
 
     async function checkRealPing() {
         try {
-            const start = performance.now();
-            await fetch('https://1.1.1.1/cdn-cgi/trace', { mode: 'no-cors' });
-            const duration = Math.floor(performance.now() - start);
-            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = duration + ' ms');
+            const start = performance.now(); await fetch('https://1.1.1.1/cdn-cgi/trace', { mode: 'no-cors' });
+            const duration = Math.floor(performance.now() - start); document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = duration + ' ms');
+            const sheetPing = document.getElementById('sheet-ping'); if(sheetPing) sheetPing.innerText = duration + ' ms';
         } catch (e) {
             document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = translations[currentLang].timeout);
         }
     }
     
-    window.onload = () => { 
-        checkEmptyState(); 
-        setInterval(checkRealPing, 5000); 
-    };
+    window.onload = () => { checkEmptyState(); setInterval(checkRealPing, 5000); };
 </script>
 </body>
 </html>
