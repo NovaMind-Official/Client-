@@ -32,7 +32,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-font-smoothing: antialiased; }
         body, html { width: 100vw; height: 100vh; background-color: var(--bg-base); color: var(--text-main); overflow: hidden; font-size: var(--font-scale); transition: background-color 0.5s ease, color 0.5s ease; }
         
-        /* استایل‌های راست‌چین برای زبان فارسی بدون بهم ریختن دکمه‌ها */
+        /* استایل‌های راست‌چین برای زبان فارسی */
         body[dir="rtl"] .settings-cell { flex-direction: row-reverse; text-align: right; }
         body[dir="rtl"] .cell-val { flex-direction: row-reverse; }
         body[dir="rtl"] .modal-navbar { flex-direction: row-reverse; }
@@ -182,9 +182,6 @@
         .ios-switch input:checked + .ios-slider:before { transform: translateX(20px); }
         .ios-switch input:active + .ios-slider:before { width: 32px; }
         .ios-switch input:checked:active + .ios-slider:before { transform: translateX(14px); width: 32px; }
-
-        .modern-range-slider { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(120,120,128,0.32); border-radius: 3px; outline: none; margin: 10px 0; }
-        .modern-range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 50%; background: white; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: transform 0.2s; }
         
         .modern-input-field { width: 100%; background: rgba(120,120,128,0.16); border: 1px solid transparent; color: var(--text-main); padding: 16px; border-radius: 14px; font-size: 1rem; font-weight: 500; outline: none; transition: border-color 0.3s, background 0.3s; }
         body[dir="rtl"] .modern-input-field { text-align: right; }
@@ -210,7 +207,7 @@
             <div class="btn-action" style="color: var(--accent-blue);" onclick="openModal('modal-hotspot')">
                 <svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
             </div>
-            <div class="btn-action" onclick="togglePlusMenu()">
+            <div class="btn-action" onclick="togglePlusMenu(event)">
                 <svg class="icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </div>
             <div class="plus-dropdown" id="plusMenu">
@@ -243,7 +240,7 @@
         <div class="settings-card-group" style="padding: 20px; display:flex; flex-direction:column; gap:18px;">
             <div>
                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="remark">Remark (Name)</p>
-                <input type="text" id="new-node-name" class="modern-input-field" placeholder="My Server">
+                <input type="text" id="new-node-name" class="modern-input-field">
             </div>
             <div>
                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="protocol">Protocol Type</p>
@@ -255,7 +252,7 @@
             </div>
             <div>
                 <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom: 8px;" data-i18n="configLink">Config Link</p>
-                <textarea id="new-node-link" class="modern-input-field" style="height:100px; resize:none;" placeholder="vless://..."></textarea>
+                <textarea id="new-node-link" class="modern-input-field" style="height:100px; resize:none;"></textarea>
             </div>
         </div>
         <button class="primary-btn" onclick="saveNewConfig()" data-i18n="saveConfig">Save & Import</button>
@@ -274,14 +271,16 @@
             <div class="settings-cell"><span data-i18n="language">Language</span> 
                 <div class="cell-val">
                     <select class="native-select" onchange="changeLanguage(this.value)">
-                        <option value="en">English</option><option value="fa">فارسی</option>
+                        <option value="en" data-i18n="langEn">English</option>
+                        <option value="fa" data-i18n="langFa">Persian (فارسی)</option>
                     </select>
                 </div>
             </div>
             <div class="settings-cell"><span data-i18n="appTheme">App Theme</span> 
                 <div class="cell-val">
                     <select class="native-select" onchange="toggleTheme(this.value)">
-                        <option value="dark">Dark</option><option value="light">Light</option>
+                        <option value="dark" data-i18n="themeDark">Dark</option>
+                        <option value="light" data-i18n="themeLight">Light</option>
                     </select>
                 </div>
             </div>
@@ -306,41 +305,61 @@
 </div>
 
 <script>
-    // دیکشنری ترجمه
+    // دیکشنری فوق‌جامع (هیچ متن انگلیسی بدون ترجمه نمانده است)
     const translations = {
         en: {
             subUrl: "Subscription URL", importClip: "Import from clipboard", importFile: "Import from File", qrCode: "QR-Code Scanner", manual: "Manual input",
             disconnected: "DISCONNECTED", connected: "CONNECTED", cancel: "Cancel", newConfig: "New Configuration", remark: "Remark (Name)", 
             protocol: "Protocol Type", configLink: "Config Link / URI", saveConfig: "Save & Import", back: "‹ Back", settings: "Settings", 
-            uiSettings: "UI Settings", language: "Language", appTheme: "App Appearance", close: "Close", hotspot: "Hotspot Engine", enableHotspot: "Enable Hotspot"
+            uiSettings: "UI Settings", language: "Language", appTheme: "App Appearance", close: "Close", hotspot: "Hotspot Engine", enableHotspot: "Enable Hotspot",
+            emptyState: "No servers added yet. Tap + to import.", copied: "Copied!", offline: "Offline", active: "Active", timeout: "Timeout", errorLink: "Please enter config link!",
+            langEn: "English", langFa: "Persian (فارسی)", themeDark: "Dark", themeLight: "Light", errFirst: "Add a server first!", camErr: "Camera scanner reserved for Android build."
         },
         fa: {
             subUrl: "لینک اشتراک", importClip: "وارد کردن از کلیپ‌بورد", importFile: "انتخاب فایل کانفیگ", qrCode: "اسکن بارکد (دوربین)", manual: "ساخت دستی کانفیگ",
             disconnected: "قطع اتصال", connected: "متصل شد", cancel: "لغو", newConfig: "افزودن سرور جدید", remark: "نام سرور (دلخواه)", 
             protocol: "نوع پروتکل", configLink: "لینک کانفیگ (vless://)", saveConfig: "ذخیره و افزودن به لیست", back: "‹ بازگشت", settings: "تنظیمات برنامه", 
-            uiSettings: "تنظیمات ظاهری", language: "زبان برنامه", appTheme: "تم برنامه", close: "بستن", hotspot: "هات‌اسپات", enableHotspot: "روشن کردن هات‌اسپات"
+            uiSettings: "تنظیمات ظاهری", language: "زبان برنامه", appTheme: "تم برنامه", close: "بستن", hotspot: "هات‌اسپات", enableHotspot: "روشن کردن هات‌اسپات",
+            emptyState: "لیست سرورها خالی است. برای افزودن روی + بزنید.", copied: "کپی شد!", offline: "آفلاین", active: "فعال", timeout: "خطای اتصال", errorLink: "لطفا لینک کانفیگ را وارد کنید!",
+            langEn: "انگلیسی", langFa: "فارسی", themeDark: "تاریک", themeLight: "روشن", errFirst: "ابتدا یک سرور اضافه کنید!", camErr: "دسترسی دوربین در نسخه نهایی فعال می‌شود."
         }
     };
     
     let currentLang = 'en';
     let isConnected = false;
 
-    // تابع تغییر زبان هوشمند (RTL)
+    // تابع تغییر زبان همه‌جانبه
     function changeLanguage(lang) {
         currentLang = lang;
-        document.body.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr'); // تغییر دایرکشن بدون خراب کردن منوها
+        document.body.setAttribute('dir', lang === 'fa' ? 'rtl' : 'ltr');
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
-            if (translations[lang][key]) el.innerText = translations[lang][key];
+            if (translations[lang][key]) {
+                // اگر تگ option است باید text آن تغییر کند
+                if(el.tagName === 'OPTION') el.text = translations[lang][key];
+                else el.innerText = translations[lang][key];
+            }
         });
         checkEmptyState();
         document.getElementById('statusLabel').innerText = translations[lang][isConnected ? 'connected' : 'disconnected'];
+        
+        // آپدیت کردن متن‌های داخل کارت‌ها
+        document.querySelectorAll('.node-status-text').forEach(el => el.innerText = translations[lang].active);
     }
 
-    // مدیریت منوی پلاس
-    function togglePlusMenu() {
+    // رفع باگ باز نشدن منوی پلاس
+    function togglePlusMenu(event) {
+        event.stopPropagation(); // این خط معجزه می‌کند و اجازه نمی‌دهد کلیک به بدنه صفحه منتقل شود
         document.getElementById('plusMenu').classList.toggle('active');
     }
+
+    // بستن منو با کلیک روی هر جای دیگر
+    window.addEventListener('click', (e) => { 
+        const menu = document.getElementById('plusMenu');
+        if (menu && menu.classList.contains('active') && !e.target.closest('.plus-dropdown')) {
+            menu.classList.remove('active');
+        }
+    });
 
     async function triggerMenuAction(action) {
         document.getElementById('plusMenu').classList.remove('active');
@@ -377,19 +396,18 @@
                 };
             }
             else if (action === 'QR-Code Scanner') {
-                alert(currentLang === 'fa' ? "دوربین در نسخه اندروید فعال می‌شود." : "Camera scanner reserved for Android build.");
+                alert(translations[currentLang].camErr);
             }
         }, 150);
     }
 
-    // ذخیره کانفیگ جدید و اضافه شدن به صفحه
+    // ذخیره کانفیگ جدید
     function saveNewConfig() {
         const name = document.getElementById('new-node-name').value || "Aether Node";
         const protocol = document.getElementById('new-node-protocol').value;
         const link = document.getElementById('new-node-link').value;
 
-        if(!link && currentLang === 'en') { alert("Please enter config link!"); return; }
-        if(!link && currentLang === 'fa') { alert("لطفا لینک کانفیگ را وارد کنید!"); return; }
+        if(!link) { alert(translations[currentLang].errorLink); return; }
 
         addNode(name, protocol);
         closeModal('modal-add-config');
@@ -398,17 +416,18 @@
         document.getElementById('new-node-link').value = '';
     }
 
-    // تابع حیاتیِ گمشده: ساختِ کارت روی صفحه
+    // افزودن کارت
     function addNode(title, method) {
         const container = document.getElementById('nodeListContainer');
         const msg = document.getElementById('empty-state-msg');
         if (msg) msg.remove();
 
         const nodeId = 'node-' + Math.floor(Math.random() * 10000);
+        const activeText = translations[currentLang].active;
         const html = `
             <div class="swipe-wrapper" id="wrap-${nodeId}">
                 <div class="swipe-actions">
-                    <div class="action-circle btn-copy" onclick="alert('Copied!')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                    <div class="action-circle btn-copy" onclick="alert(translations[currentLang].copied)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
                     <div class="action-circle btn-delete" onclick="document.getElementById('wrap-${nodeId}').remove(); checkEmptyState();"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></div>
                 </div>
                 <div class="config-node-card collapsed" id="${nodeId}">
@@ -416,7 +435,7 @@
                         <div class="node-title-container"><div class="node-title-label">${title}</div><div class="node-type-label">${method}</div></div>
                         <div class="config-collapse-arrow"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
                     </div>
-                    <div class="card-foldable-zone"><div class="foldable-inner"><div class="node-details"><span style="color:var(--text-sub)">Active</span><div class="live-ping-box"><div class="ping-dot"></div><span class="live-ping-text">...</span></div></div></div></div>
+                    <div class="card-foldable-zone"><div class="foldable-inner"><div class="node-details"><span class="node-status-text" style="color:var(--text-sub)">${activeText}</span><div class="live-ping-box"><div class="ping-dot"></div><span class="live-ping-text">...</span></div></div></div></div>
                 </div>
             </div>`;
         container.insertAdjacentHTML('beforeend', html);
@@ -424,22 +443,20 @@
         checkRealPing();
     }
 
-    // حالت خالی بودن صفحه
     function checkEmptyState() {
         const container = document.getElementById('nodeListContainer');
         if (container.querySelectorAll('.swipe-wrapper').length === 0) {
-            container.innerHTML = `<div id="empty-state-msg" style="text-align:center; color:var(--text-sub); padding:40px 20px; font-size:0.95rem;">${currentLang === 'fa' ? 'لیست سرورها خالی است. برای افزودن روی + بزنید.' : 'No servers added yet. Tap + to import.'}</div>`;
+            container.innerHTML = `<div id="empty-state-msg" style="text-align:center; color:var(--text-sub); padding:40px 20px; font-size:0.95rem;">${translations[currentLang].emptyState}</div>`;
         }
     }
 
-    // توابع پایه UI
     function toggleTheme(theme) { theme === 'light' ? document.body.classList.add('light-mode') : document.body.classList.remove('light-mode'); }
     function openModal(id) { document.getElementById(id).classList.add('open'); document.body.classList.add('modal-open'); }
     function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.classList.remove('modal-open'); }
     
     function toggleConnection() {
         if (document.getElementById('nodeListContainer').querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) {
-            alert(currentLang === 'fa' ? "ابتدا یک سرور اضافه کنید!" : "Add a server first!"); return;
+            alert(translations[currentLang].errFirst); return;
         }
         isConnected = !isConnected; 
         document.getElementById('powerBtn').classList.toggle('active', isConnected);
@@ -447,7 +464,6 @@
         document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
     }
 
-    // انیمیشن لمسی کارت‌ها
     function initSwipe(id) {
         const card = document.getElementById(id); 
         const wrapper = document.getElementById('wrap-' + id);
@@ -458,7 +474,6 @@
         card.addEventListener('touchmove', e => { 
             let diff = e.touches[0].clientX - startX;
             let dir = document.body.getAttribute('dir');
-            // محاسبه جهت ساید بر اساس چپ‌چین یا راست‌چین
             if ((dir === 'ltr' && diff < 0 && diff > -130) || (dir === 'rtl' && diff > 0 && diff < 130)) { 
                 isSwiping = true; currentX = diff; card.style.transform = `translate3d(${diff}px, 0, 0)`; actions.style.opacity = Math.abs(diff) / 100;
             } 
@@ -473,7 +488,6 @@
         });
     }
 
-    // پینگ واقعی
     async function checkRealPing() {
         try {
             const start = performance.now();
@@ -481,21 +495,14 @@
             const duration = Math.floor(performance.now() - start);
             document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = duration + ' ms');
         } catch (e) {
-            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = 'Timeout');
+            document.querySelectorAll('.live-ping-text').forEach(el => el.innerText = translations[currentLang].timeout);
         }
     }
     
-    // وقتی سایت باز شد
     window.onload = () => { 
         checkEmptyState(); 
         setInterval(checkRealPing, 5000); 
     };
-
-    // کلیک بیرون منو برای بستن
-    window.addEventListener('click', (e) => { 
-        if(!e.target.closest('.action-cluster')) document.getElementById('plusMenu').classList.remove('active');
-    });
-
 </script>
 </body>
 </html>
