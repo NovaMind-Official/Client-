@@ -514,12 +514,11 @@
         setInterval(checkRealPing, 5000); // هر ۵ ثانیه پینگ واقعی می‌گیرد
     };
 
-    // --- ۳. عملکرد واقعی دکمه‌های منوی پلاس (ضد فریز) ---
-    async function triggerMenuAction(action) {
-        // ابتدا منو را می‌بندیم
+     async function triggerMenuAction(action) {
+        // بستن منو
         document.getElementById('plusMenu').classList.remove('active');
         
-        // وقفه ۳۵۰ میلی‌ثانیه‌ای برای جلوگیری از فریز شدن مرورگر سافاری روی آیپد
+        // وقفه برای جلوگیری از فریز شدن دستگاه
         setTimeout(async () => {
             try {
                 if (action === 'Manual Input') {
@@ -530,32 +529,51 @@
                     addNode(title, method.toUpperCase());
                 } 
                 else if (action === 'Import from clipboard') {
-                    // خواندن واقعی متن از کلیپ‌بورد دستگاه
                     const text = await navigator.clipboard.readText();
                     if (text && (text.includes('vless://') || text.includes('trojan://') || text.includes('vmess://'))) {
                         let method = text.split('://')[0].toUpperCase();
-                        addNode('Imported Server', method);
+                        addNode('Imported from Clipboard', method);
                     } else {
                         alert(currentLang === 'fa' ? "کانفیگ معتبری در کلیپ‌بورد یافت نشد!" : "No valid config found in clipboard!");
                     }
                 }
                 else if (action === 'Subscription URL') {
                     let url = prompt(currentLang === 'fa' ? "لینک اشتراک را وارد کنید:" : "Enter Subscription URL:");
-                    if (url) {
-                        addNode('Subscription Node', 'VLESS');
-                    }
+                    if (url) addNode('Subscription Node', 'VLESS');
+                }
+                // === بخش جدید و واقعی برای دسترسی به فایل‌ها ===
+                else if (action === 'Import from File') {
+                    // ساختن یک دکمه مخفی برای باز کردن مدیریت فایل گوشی
+                    let fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '.txt,.json'; // فقط فایل‌های متنی و جیسون
+                    
+                    fileInput.onchange = e => {
+                        let file = e.target.files[0];
+                        if (!file) return;
+                        
+                        let reader = new FileReader();
+                        reader.readAsText(file, 'UTF-8');
+                        reader.onload = readerEvent => {
+                            // در اینجا فایل با موفقیت خوانده شده و کارت ساخته می‌شود
+                            let content = readerEvent.target.result;
+                            addNode(file.name, 'FILE');
+                            setTimeout(() => {
+                                alert(currentLang === 'fa' ? "فایل با موفقیت خوانده شد!" : "File loaded successfully!");
+                            }, 300);
+                        }
+                    };
+                    fileInput.click(); // شبیه‌سازی کلیک برای باز شدن گالری/فایل‌ها
                 }
                 else if (action === 'QR-Code Scanner') {
                     alert(currentLang === 'fa' ? "دسترسی به دوربین در نسخه نهایی (APK) فعال می‌شود." : "Camera access will be available in the final APK.");
-                }
-                else if (action === 'Copy JSON Format') {
-                    alert(currentLang === 'fa' ? "ساختار JSON کپی شد." : "JSON format copied!");
                 }
             } catch (err) {
                 console.log("Error in menu action:", err);
             }
         }, 350);
     }
+
 
     // --- اضافه کردن و مدیریت کارت‌های کانفیگ ---
     let currentEditingNodeId = null;
