@@ -476,23 +476,28 @@
     window.addEventListener('click', (e) => { if(!e.target.closest('.action-cluster')) document.getElementById('plusMenu').classList.remove('active'); });
 
     // --- سیستم هوشمند افزودن کانفیگ توسط کاربر ---
-    function triggerMenuAction(action) {
+        function triggerMenuAction(action) {
+        // ۱. بستن منو
         document.getElementById('plusMenu').classList.remove('active');
         
-        if (action === 'Manual Input' || action === 'Import from clipboard') {
-            let defaultName = action === 'Manual Input' ? 'Custom Server' : 'Imported Server';
-            let title = prompt(currentLang === 'fa' ? "لطفاً نام سرور را وارد کنید:" : "Enter Server Name:", defaultName);
-            if (!title) return;
-            
-            let method = prompt(currentLang === 'fa' ? "نوع پروتکل (VLESS, TROJAN, VMESS):" : "Enter Protocol (VLESS, TROJAN, VMESS):", "VLESS");
-            if (!method) return;
-            
-            addNode(title, method.toUpperCase());
-            alert(currentLang === 'fa' ? "سرور با موفقیت اضافه شد!" : "Server added successfully!");
-        } else {
-            alert("Action Called: " + action);
-        }
+        // ۲. ایجاد وقفه ۱۰۰ میلی‌ثانیه‌ای برای جلوگیری از فریز شدن سیستم
+        setTimeout(() => {
+            if (action === 'Manual Input' || action === 'Import from clipboard') {
+                let defaultName = action === 'Manual Input' ? 'Custom Server' : 'Imported Server';
+                let title = prompt(currentLang === 'fa' ? "لطفاً نام سرور را وارد کنید:" : "Enter Server Name:", defaultName);
+                if (!title) return;
+                
+                let method = prompt(currentLang === 'fa' ? "نوع پروتکل (VLESS, TROJAN, VMESS):" : "Enter Protocol (VLESS, TROJAN, VMESS):", "VLESS");
+                if (!method) return;
+                
+                addNode(title, method.toUpperCase());
+                // حذف آلرت "با موفقیت اضافه شد" برای جلوگیری از فریز مجدد
+            } else {
+                alert("Action Called: " + action);
+            }
+        }, 100);
     }
+
 
     // بررسی خالی بودن لیست سرورها
     function checkEmptyState() {
