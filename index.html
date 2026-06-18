@@ -508,43 +508,42 @@
         setInterval(checkRealPing, 5000);
     };
 
-    // --- عملکرد منوی پلاس بدون استفاده از پرامپت‌های باگ‌دار مرورگر ---
-    async function triggerMenuAction(action) {
-        document.getElementById('plusMenu').classList.remove('active');
-        
-        // حذف کامل prompt و استفاده از سیستم خودکار برای تست بدون فریز
-        if (action === 'Manual Input') {
-            // به جای باز کردن پنجره باگ‌دار، مستقیماً یک کانفیگ تستی شیک می‌سازد
-            addNode("Aether Custom Server", "VLESS");
-        } 
-        else if (action === 'Import from clipboard') {
-            try {
-                const text = await navigator.clipboard.readText();
-                if (text && (text.includes('vless://') || text.includes('trojan://') || text.includes('vmess://'))) {
-                    let method = text.split('://')[0].toUpperCase();
-                    addNode('Imported Server', method);
-                } else {
-                    addNode('Link Node', 'VLESS'); // بک‌آپ در صورت عدم دسترسی مرورگر به کلیپ‌بورد
-                }
-            } catch (e) {
-                addNode('Clipboard Node', 'TROJAN');
+      async function triggerMenuAction(action) {
+        // ۱. بستن منوی پلاس با استایل نیتیو
+        const menu = document.getElementById('plusMenu');
+        if (menu) menu.classList.remove('active');
+
+        // ۲. اجرای عملیات بر اساس دکمه
+        setTimeout(() => {
+            if (action === 'Manual Input') {
+                openModal('modal-add-config'); // باز کردن کادر ورود اطلاعات
+            } 
+            else if (action === 'Import from clipboard') {
+                navigator.clipboard.readText().then(text => {
+                    document.getElementById('new-node-link').value = text || '';
+                    openModal('modal-add-config'); // باز کردن کادر با متنِ چسبانده شده
+                }).catch(() => openModal('modal-add-config'));
             }
-        }
-        else if (action === 'Subscription URL') {
-            addNode('Sub Node (web.pli.ir)', 'VLESS');
-        }
-        else if (action === 'Import from File') {
-            let fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = '.txt,.json';
-            fileInput.onchange = e => {
-                let file = e.target.files[0];
-                if (!file) return;
-                addNode(file.name, 'FILE');
-            };
-            fileInput.click();
-        }
+            else if (action === 'Import from File') {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.click();
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            document.getElementById('new-node-link').value = e.target.result;
+                            document.getElementById('new-node-name').value = file.name;
+                            openModal('modal-add-config'); // نمایش فایل در کادر نیتیو
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+            }
+        }, 150);
     }
+
 
     let currentEditingNodeId = null;
 
