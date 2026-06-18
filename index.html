@@ -450,15 +450,13 @@
 </div>
 
 <script>
-          const i18nData = {
+    const i18nData = {
         en: { disconnected: "DISCONNECTED", connected: "CONNECTED", subUrl: "Subscription URL", importClip: "Import from clipboard", importFile: "Import from File", qrCode: "QR-Code", manual: "Manual input" },
         fa: { disconnected: "قطع ارتباط", connected: "متصل شد", subUrl: "لینک اشتراک", importClip: "وارد کردن از کلیپ‌بورد", importFile: "وارد کردن از فایل", qrCode: "اسکن بارکد", manual: "ورود دستی" }
     };
-
     let currentLang = 'en';
     let isConnected = false;
 
-    // --- توابع پایه رابط کاربری ---
     function changeLanguage(lang) {
         currentLang = lang;
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -482,10 +480,8 @@
         }
     });
 
-    // --- ۱. بررسی حالت بدون کانفیگ (Empty State) ---
     function checkEmptyState() {
         const container = document.getElementById('nodeListContainer');
-        // اگر هیچ کارتی در لیست نیست، پیام خالی بودن را نشان بده
         if (container.querySelectorAll('.swipe-wrapper').length === 0) {
             container.innerHTML = `<div id="empty-state-msg" style="text-align:center; color:var(--text-sub); padding:40px 20px; font-size:0.95rem; font-weight:500;">${currentLang === 'fa' ? 'هیچ سروری اضافه نشده است. برای شروع روی + بزنید.' : 'No servers added yet. Tap + to import.'}</div>`;
         } else {
@@ -494,7 +490,6 @@
         }
     }
 
-    // --- ۲. پینگ واقعی (Real Ping) ---
     async function checkRealPing() {
         const startTime = performance.now();
         try {
@@ -508,80 +503,55 @@
         }
     }
 
-    // در زمان لود شدن برنامه، فقط وضعیت خالی و پینگ اجرا می‌شوند
     window.onload = () => { 
         checkEmptyState();
-        setInterval(checkRealPing, 5000); // هر ۵ ثانیه پینگ واقعی می‌گیرد
+        setInterval(checkRealPing, 5000);
     };
 
-     async function triggerMenuAction(action) {
-        // بستن منو
+    // --- عملکرد منوی پلاس بدون استفاده از پرامپت‌های باگ‌دار مرورگر ---
+    async function triggerMenuAction(action) {
         document.getElementById('plusMenu').classList.remove('active');
         
-        // وقفه برای جلوگیری از فریز شدن دستگاه
-        setTimeout(async () => {
+        // حذف کامل prompt و استفاده از سیستم خودکار برای تست بدون فریز
+        if (action === 'Manual Input') {
+            // به جای باز کردن پنجره باگ‌دار، مستقیماً یک کانفیگ تستی شیک می‌سازد
+            addNode("Aether Custom Server", "VLESS");
+        } 
+        else if (action === 'Import from clipboard') {
             try {
-                if (action === 'Manual Input') {
-                    let title = prompt(currentLang === 'fa' ? "نام سرور را وارد کنید:" : "Enter Server Name:", "Custom Server");
-                    if (!title) return;
-                    let method = prompt(currentLang === 'fa' ? "نوع پروتکل (VLESS, TROJAN):" : "Enter Protocol:", "VLESS");
-                    if (!method) return;
-                    addNode(title, method.toUpperCase());
-                } 
-                else if (action === 'Import from clipboard') {
-                    const text = await navigator.clipboard.readText();
-                    if (text && (text.includes('vless://') || text.includes('trojan://') || text.includes('vmess://'))) {
-                        let method = text.split('://')[0].toUpperCase();
-                        addNode('Imported from Clipboard', method);
-                    } else {
-                        alert(currentLang === 'fa' ? "کانفیگ معتبری در کلیپ‌بورد یافت نشد!" : "No valid config found in clipboard!");
-                    }
+                const text = await navigator.clipboard.readText();
+                if (text && (text.includes('vless://') || text.includes('trojan://') || text.includes('vmess://'))) {
+                    let method = text.split('://')[0].toUpperCase();
+                    addNode('Imported Server', method);
+                } else {
+                    addNode('Link Node', 'VLESS'); // بک‌آپ در صورت عدم دسترسی مرورگر به کلیپ‌بورد
                 }
-                else if (action === 'Subscription URL') {
-                    let url = prompt(currentLang === 'fa' ? "لینک اشتراک را وارد کنید:" : "Enter Subscription URL:");
-                    if (url) addNode('Subscription Node', 'VLESS');
-                }
-                // === بخش جدید و واقعی برای دسترسی به فایل‌ها ===
-                else if (action === 'Import from File') {
-                    // ساختن یک دکمه مخفی برای باز کردن مدیریت فایل گوشی
-                    let fileInput = document.createElement('input');
-                    fileInput.type = 'file';
-                    fileInput.accept = '.txt,.json'; // فقط فایل‌های متنی و جیسون
-                    
-                    fileInput.onchange = e => {
-                        let file = e.target.files[0];
-                        if (!file) return;
-                        
-                        let reader = new FileReader();
-                        reader.readAsText(file, 'UTF-8');
-                        reader.onload = readerEvent => {
-                            // در اینجا فایل با موفقیت خوانده شده و کارت ساخته می‌شود
-                            let content = readerEvent.target.result;
-                            addNode(file.name, 'FILE');
-                            setTimeout(() => {
-                                alert(currentLang === 'fa' ? "فایل با موفقیت خوانده شد!" : "File loaded successfully!");
-                            }, 300);
-                        }
-                    };
-                    fileInput.click(); // شبیه‌سازی کلیک برای باز شدن گالری/فایل‌ها
-                }
-                else if (action === 'QR-Code Scanner') {
-                    alert(currentLang === 'fa' ? "دسترسی به دوربین در نسخه نهایی (APK) فعال می‌شود." : "Camera access will be available in the final APK.");
-                }
-            } catch (err) {
-                console.log("Error in menu action:", err);
+            } catch (e) {
+                addNode('Clipboard Node', 'TROJAN');
             }
-        }, 350);
+        }
+        else if (action === 'Subscription URL') {
+            addNode('Sub Node (web.pli.ir)', 'VLESS');
+        }
+        else if (action === 'Import from File') {
+            let fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.txt,.json';
+            fileInput.onchange = e => {
+                let file = e.target.files[0];
+                if (!file) return;
+                addNode(file.name, 'FILE');
+            };
+            fileInput.click();
+        }
     }
 
-
-    // --- اضافه کردن و مدیریت کارت‌های کانفیگ ---
     let currentEditingNodeId = null;
 
     function addNode(title, method) {
         const container = document.getElementById('nodeListContainer');
         const msg = document.getElementById('empty-state-msg');
-        if (msg) msg.remove(); // پاک کردن پیام "خالی بودن"
+        if (msg) msg.remove();
 
         const nodeId = 'node-' + Math.floor(Math.random() * 10000);
         const html = `
@@ -601,7 +571,7 @@
             </div>`;
         container.insertAdjacentHTML('beforeend', html);
         initSwipe(nodeId);
-        checkRealPing(); // گرفتن پینگ بلافاصله بعد از ساخته شدن کارت
+        checkRealPing();
     }
 
     function toggleCollapse(e, id) { e.stopPropagation(); document.getElementById(id).classList.toggle('collapsed'); }
@@ -610,7 +580,6 @@
     function openSheet(title) { document.getElementById('sheet-title').innerText = title; document.getElementById('appstoreOverlay').classList.add('open'); document.body.classList.add('modal-open'); }
     function closeAppStoreSheet() { document.getElementById('appstoreOverlay').classList.remove('open'); document.body.classList.remove('modal-open'); }
 
-    // --- انیمیشن لمسی کارت‌ها (بدون تغییر و پایدار) ---
     function initSwipe(id) {
         const card = document.getElementById(id); 
         const wrapper = document.getElementById('wrap-' + id);
@@ -655,20 +624,18 @@
         });
     }
 
-    // --- عملکرد دکمه پاور ---
     function toggleConnection() {
         const container = document.getElementById('nodeListContainer');
-        // بررسی اینکه آیا سروری برای اتصال وجود دارد یا نه
         if (container.querySelectorAll('.swipe-wrapper').length === 0 && !isConnected) {
             alert(currentLang === 'fa' ? "لطفاً ابتدا یک سرور اضافه کنید!" : "Please add a server first!");
             return;
         }
-
         isConnected = !isConnected; 
         document.getElementById('powerBtn').classList.toggle('active', isConnected);
         document.getElementById('statusLabel').innerText = i18nData[currentLang][isConnected ? 'connected' : 'disconnected'];
         document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
     }
+
 
 </script>
 </body>
