@@ -508,20 +508,18 @@
         setInterval(checkRealPing, 5000);
     };
 
-      async function triggerMenuAction(action) {
-        // ۱. بستن منوی پلاس با استایل نیتیو
+          async function triggerMenuAction(action) {
         const menu = document.getElementById('plusMenu');
         if (menu) menu.classList.remove('active');
 
-        // ۲. اجرای عملیات بر اساس دکمه
         setTimeout(() => {
             if (action === 'Manual Input') {
-                openModal('modal-add-config'); // باز کردن کادر ورود اطلاعات
+                openModal('modal-add-config');
             } 
             else if (action === 'Import from clipboard') {
                 navigator.clipboard.readText().then(text => {
                     document.getElementById('new-node-link').value = text || '';
-                    openModal('modal-add-config'); // باز کردن کادر با متنِ چسبانده شده
+                    openModal('modal-add-config');
                 }).catch(() => openModal('modal-add-config'));
             }
             else if (action === 'Import from File') {
@@ -535,11 +533,14 @@
                         reader.onload = (e) => {
                             document.getElementById('new-node-link').value = e.target.result;
                             document.getElementById('new-node-name').value = file.name;
-                            openModal('modal-add-config'); // نمایش فایل در کادر نیتیو
+                            openModal('modal-add-config');
                         };
                         reader.readAsText(file);
                     }
                 };
+            }
+            else if (action === 'QR-Code Scanner') {
+                alert("Camera scanner will be available in the final Android build.");
             }
         }, 150);
     }
