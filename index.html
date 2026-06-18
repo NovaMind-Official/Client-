@@ -633,7 +633,24 @@
         document.getElementById('powerBtn').classList.toggle('active', isConnected);
         document.getElementById('statusLabel').innerText = i18nData[currentLang][isConnected ? 'connected' : 'disconnected'];
         document.getElementById('statusLabel').style.color = isConnected ? 'var(--success)' : 'var(--text-sub)';
+       function saveNewConfig() {
+        let name = document.getElementById('new-node-name').value.trim();
+        let protocol = document.getElementById('new-node-protocol').value;
+        let link = document.getElementById('new-node-link').value.trim();
+        
+        if (!name) name = 'New Config';
+        
+        // این دستور کارت سرور را روی صفحه می‌سازد
+        addNode(name, protocol);
+        
+        // بستن مدال بعد از ذخیره
+        closeModal('modal-add-config');
+        
+        // پاک کردن فیلدها برای استفاده بعدی
+        document.getElementById('new-node-name').value = '';
+        document.getElementById('new-node-link').value = '';
     }
+ }
 
 
 </script>
