@@ -4,7 +4,7 @@ Aether is a production-ready, high-end UI/UX client template and native interfac
 
 It is designed as a premium B2B digital asset for development teams, VPN providers, and companies looking to bypass months of design overhead and instantly deploy a luxury-tier frontend interface.
 
-⚡ **Live Interactive UI Preview:** [Insert your GitHub Pages Link Here]
+⚡ **Live Interactive UI Preview:** [https://novamind-official.github.io/Client-/]
 
 ---
 
